@@ -121,7 +121,7 @@
 		if(missiles.length > 0) {
 			for(var m=0;m<missiles.length;m++) {
 				missile = missiles[m];
-				if(missile.x < canvas.width + 200) {
+				if(missile.x < canvas.width + missileSpace) {
 					ctx.beginPath();
 					console.log("X: "+missile.y+" Y: "+missile.y);
 					ctx.rect(missile.x, missile.y, missileWidth, missileHeight);
