@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Gamedev Canvas Workshop</title>
+    <style>
+    	* { padding: 0; margin: 0; }
+    	canvas { background: #eee; display: block; margin: 0 auto; }
+    </style>
+</head>
+<body>
+
+<canvas id="myCanvas" width="480" height="320"></canvas>
+
+<script>
+	var canvas = document.getElementById("myCanvas");
+	var ctx = canvas.getContext("2d");
+
+	var shipX = 10;
+	var shipY = canvas.height / 2;
+	var shipHeight = 10;
+	var shipWidth = 20;
+	var shipSpeed = 5;
+
+	var missileX = shipX + shipWidth;
+	var missileY = shipY + shipHeight/2;
+	var missileHeight = 2;
+	var missileWidth = 5;
+	var missileSpeed = 3;
+	var missiles = [{x: missileX, y: missileY}];
+	var missileSpace = 50;
+
+	var upPressed = false;
+	var downPressed = false;
+	var rightPressed = false;
+	var leftPressed = false;
+	var spacePressed = false;
+
+	document.addEventListener("keydown", keyDownHandler, false);
+	document.addEventListener("keyup", keyUpHandler, false);
+
+	function keyDownHandler(e) {
+		if(e.key == "Up" || e.key == "ArrowUp") {
+			upPressed = true;
+		} else if(e.key == "Down" || e.key == "ArrowDown") {
+			downPressed = true;
+		} else if(e.key == "Right" || e.key == "ArrowRight") {
+			rightPressed = true;
+		} else if(e.key == "Left" || e.key == "ArrowLeft") {
+			leftPressed = true;
+		} else if(e.keyCode == 32) {
+			spacePressed = true;
+		}
+	}
+
+	function keyUpHandler(e) {
+		if(e.key == "Up" || e.key == "ArrowUp") {
+			upPressed = false;
+		} else if(e.key == "Down" || e.key == "ArrowDown") {
+			downPressed = false;
+		} else if(e.key == "Right" || e.key == "ArrowRight") {
+			rightPressed = false;
+		} else if(e.key == "Left" || e.key == "ArrowLeft") {
+			leftPressed = false;
+		} else if(e.keyCode == 32) {
+			spacePressed = false;
+		}
+	}
+
+	function drawShip() {
+		ctx.beginPath();
+		ctx.rect(shipX, shipY, shipWidth, shipHeight);
+		ctx.fillStyle = "#F00000";
+		ctx.fill();
+		ctx.closePath();
+	}
+
+	function buttonActions() {
+		if(upPressed) {
+			shipY -= shipSpeed;
+			if(shipY < 0) {
+				shipY = 0;
+			}
+		}
+
+		if(downPressed) {
+			shipY += shipSpeed;
+			if(shipY + shipHeight > canvas.height) {
+				shipY = canvas.height - shipHeight;
+			}
+		} 
+
+		if(rightPressed) {
+			shipX += shipSpeed;
+			if(shipX + shipWidth > canvas.width) {
+				shipX = canvas.width - shipWidth;
+			}
+		} 
+
+		if(leftPressed) {
+			shipX -= shipSpeed;
+			if(shipX < 0) {
+				shipX = 0;
+			}
+		}
+
+		if(spacePressed) {
+			missileX = shipX + shipWidth;
+			missileY = shipY + shipHeight/2;
+			fire();
+		}
+	}
+
+	function fire() {
+		if(missiles[missiles.length-1].x - missileX > 50) {
+			missiles.push({x: missileX, y: missileY});
+		}
+	}
+
+	function drawMissiles() {
+		if(missiles.length > 0) {
+			for(var m=0;m<missiles.length;m++) {
+				missile = missiles[m];
+				if(missile.x < canvas.width) {
+					ctx.beginPath();
+					console.log("X: "+missile.y+" Y: "+missile.y);
+					ctx.rect(missile.x, missile.y, missileWidth, missileHeight);
+					ctx.fillStyle = "#F188C1";
+					ctx.fill();
+					ctx.closePath();
+				}
+			}
+		}
+	}
+
+	function missileMovement() {
+		for(var x=0;x<missiles.length;x++) {
+			missile = missiles[x];
+			missile.x += missileSpeed;
+		}
+	}
+
+	function draw() {
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		drawShip();
+		drawMissiles();
+		missileMovement();
+		buttonActions();
+
+		requestAnimationFrame(draw);
+	}
+
+	draw();
+
+</script>
+
+</body>
+</html>
