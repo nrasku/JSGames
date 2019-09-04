@@ -27,8 +27,8 @@
 	var missileHeight = 2;
 	var missileWidth = 5;
 	var missileSpeed = 3;
-	var missiles = [{x: missileX, y: missileY}];
-	var missileSpace = 50;
+	var missiles = [{x: missileX, y: missileY, originalX: missileX}];
+	var missileSpace = 35;
 
 	var upPressed = false;
 	var downPressed = false;
@@ -112,8 +112,8 @@
 	}
 
 	function fire() {
-		if(missiles[missiles.length-1].x - missileX > 50) {
-			missiles.push({x: missileX, y: missileY});
+		if(missiles[missiles.length-1].x - missiles[missiles.length-1].originalX > missileSpace) {
+			missiles.push({x: missileX, y: missileY, originalX: missileX});
 		}
 	}
 
@@ -121,7 +121,7 @@
 		if(missiles.length > 0) {
 			for(var m=0;m<missiles.length;m++) {
 				missile = missiles[m];
-				if(missile.x < canvas.width) {
+				if(missile.x < canvas.width + 200) {
 					ctx.beginPath();
 					console.log("X: "+missile.y+" Y: "+missile.y);
 					ctx.rect(missile.x, missile.y, missileWidth, missileHeight);
