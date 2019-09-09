@@ -27,7 +27,7 @@
 	var shipHeight = 10;
 	var shipWidth = 20;
 	var shipSpeed = 2;
-	var lives = 5;
+	var lives = 3;
 	var touchable = true;
 	var blinkTimer = null;
 	var blinkTime = 5;
@@ -141,7 +141,7 @@
 	}
 
 	function fire() {
-		if(missiles[missiles.length-1].x - missiles[missiles.length-1].originalX > missileSpace) {
+		if(missiles.length === 0 || missiles[missiles.length-1].x - missiles[missiles.length-1].originalX > missileSpace) {
 			missiles.push({x: missileX, y: missileY, originalX: missileX});
 		}
 	}
@@ -175,9 +175,7 @@
 			touchable = false;
 			blinkTimer = new Date();
 			if(!lives) {
-				alert("You have been defeated");
 				gameOver = true;
-				document.location.reload();
 			} else {
 				shipX = 10;
 				shipY = canvas.height/2; 
@@ -283,7 +281,7 @@
 				enemy.y += enemy.ySpeed;
 			}
 			if(enemy.x + enemy.width <= 0) {
-				enemies.splice(e, 1);
+				zigzagEnemies.splice(z, 1);
 			}
 		}
 	}
@@ -300,6 +298,21 @@
 		ctx.font = "16px Helvetica";
 		ctx.fillStyle = "#0095DD";
 		ctx.fillText("Lives: "+lives, canvas.width-65, 20);
+	}
+
+	function drawGameState() {
+		if(gameWon && !gameOver) {
+			ctx.beginPath();
+			ctx.font = "48px Helvetica";
+			ctx.fillStyle = "#0095DD";
+			ctx.fillText("YOU WIN", 200, canvas.height/2);
+		}
+		if(gameOver) {
+			ctx.beginPath();
+			ctx.font = "48px Helvetica";
+			ctx.fillStyle = "#C2130A"
+			ctx.fillText("GAME OVER", 150, canvas.height/2);
+		}
 	}
 
 	function missileMovement() {
@@ -319,6 +332,7 @@
 		drawZigzagEnemies();
 		drawLives();
 		drawScore();
+		drawGameState();
 		missileMovement();
 		buttonActions();
 		checkTouchable();
