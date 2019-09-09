@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <title>Gamedev Canvas Workshop</title>
+    <script type="text/javascript" src="./underscore-min.js"></script>
     <style>
     	* { padding: 0; margin: 0; }
     	canvas { background: #eee; display: block; margin: 0 auto; }
@@ -10,17 +11,26 @@
 </head>
 <body>
 
-<canvas id="myCanvas" width="480" height="320"></canvas>
+<canvas id="myCanvas" width="600" height="380"></canvas>
 
 <script>
 	var canvas = document.getElementById("myCanvas");
 	var ctx = canvas.getContext("2d");
 
+	var start = new Date();
+	var score = 0;
+	var gameOver = false;
+	var gameWon = false;
+
 	var shipX = 10;
 	var shipY = canvas.height / 2;
 	var shipHeight = 10;
 	var shipWidth = 20;
-	var shipSpeed = 5;
+	var shipSpeed = 2;
+	var lives = 5;
+	var touchable = true;
+	var blinkTimer = null;
+	var blinkTime = 5;
 
 	var missileX = shipX + shipWidth;
 	var missileY = shipY + shipHeight/2;
@@ -29,6 +39,33 @@
 	var missileSpeed = 3;
 	var missiles = [{x: missileX, y: missileY, originalX: missileX}];
 	var missileSpace = 35;
+
+	var enemyYPositions = [40, 80, 120, 160, 200, 240, 280, 320, 360];
+	var enemyTimer = _.range(1, 21);
+	var enemyX = canvas.width + 50;
+	var enemyHeight = 14;
+	var enemyWidth = 22;
+	var enemySpeed = 2;
+	var enemies = [];
+	for(var e=0;e<15;e++) {
+		enemies.push({x: enemyX, y: _.sample(enemyYPositions), height: enemyHeight, width: enemyWidth, 
+						speed: enemySpeed, timing: _.sample(enemyTimer), onField: true});
+	}
+
+	var zigzagEnemyTimer = _.range(10, 21);
+	var zigzagEnemyX = canvas.width + 50;
+	var zigzagEnemyHeight = 10;
+	var zigzagEnemyWidth = 20;
+	var zigzagEnemyXSpeed = 2;
+	var zigzagEnemyYSpeed = 2;
+	var verticalMovement = 40;
+	var zigzagEnemies = [];
+	for(var e=0;e<6;e++) {
+		var originalY = _.sample(enemyYPositions);
+		zigzagEnemies.push({x: zigzagEnemyX, y: originalY, height: zigzagEnemyHeight, width: zigzagEnemyWidth, 
+							timing: _.sample(zigzagEnemyTimer), ySpeed: zigzagEnemyYSpeed, originalY: originalY, onField: true});
+
+	}
 
 	var upPressed = false;
 	var downPressed = false;
@@ -65,14 +102,6 @@
 		} else if(e.keyCode == 32) {
 			spacePressed = false;
 		}
-	}
-
-	function drawShip() {
-		ctx.beginPath();
-		ctx.rect(shipX, shipY, shipWidth, shipHeight);
-		ctx.fillStyle = "#F00000";
-		ctx.fill();
-		ctx.closePath();
 	}
 
 	function buttonActions() {
@@ -117,26 +146,168 @@
 		}
 	}
 
+	function shipCollisionDetection() {
+		for(var x=0;x<enemies.length;x++) {
+			var enemy = enemies[x];
+			shipEnemyCollisionDetection(enemy);
+		}
+		for(var z=0;z<zigzagEnemies.length;z++) {
+			var enemy = zigzagEnemies[z];
+			shipEnemyCollisionDetection(enemy);
+		}
+	}
+
+	function missileCollisionDetection() {
+		for(var x=0;x<enemies.length;x++) {
+			var enemy = enemies[x];
+			missileEnemyCollisionDetection(enemy, enemies, x);
+		}
+		for(var z=0;z<zigzagEnemies.length;z++) {
+			var enemy = zigzagEnemies[z];
+			missileEnemyCollisionDetection(enemy, zigzagEnemies, z);
+		}
+	}
+
+	function shipEnemyCollisionDetection(enemy) {
+		if(shipX + shipWidth > enemy.x && shipX < enemy.x + enemyWidth && 
+			shipY + shipHeight > enemy.y && shipY < enemy.y + enemyHeight && touchable) {
+			lives -= 1;
+			touchable = false;
+			blinkTimer = new Date();
+			if(!lives) {
+				alert("You have been defeated");
+				gameOver = true;
+				document.location.reload();
+			} else {
+				shipX = 10;
+				shipY = canvas.height/2; 
+			}
+		}
+	}
+
+	function missileEnemyCollisionDetection(enemy, enemyArray, enemyIndex) {
+		for(var m=0;m<missiles.length;m++) {
+			var missile = missiles[m];
+			if(missile.x + missileWidth > enemy.x && missile.x < enemy.x + enemy.width && 
+				missile.y + missileHeight > enemy.y && missile.y < enemy.y + enemyHeight) {
+				missiles.splice(m, 1);
+				enemyArray.splice(enemyIndex, 1);
+				score += 1;
+			}
+		}
+	}
+
+	function checkTouchable() {
+		var elapsed = (new Date() - blinkTimer)/1000;
+		if(elapsed >= blinkTime) {
+			touchable = true;
+			blinkTimer = null;
+		}
+	}
+
+	function drawShip() {
+		var elapsed = (new Date() - blinkTimer)/1000;
+		var decimal = Math.round(elapsed * 10);
+		if(!blinkTimer || decimal % 2 == 1) {
+			ctx.beginPath();
+			ctx.rect(shipX, shipY, shipWidth, shipHeight);
+			ctx.fillStyle = "#F00000";
+			ctx.fill();
+			ctx.closePath();
+		} else {
+			ctx.beginPath();
+			ctx.rect(shipX, shipY, shipWidth, shipHeight);
+			ctx.fillStyle = "#FFD9D9";
+			ctx.fill();
+			ctx.closePath();
+		}
+	}
+
 	function drawMissiles() {
 		if(missiles.length > 0) {
 			for(var m=0;m<missiles.length;m++) {
 				missile = missiles[m];
 				if(missile.x < canvas.width + missileSpace) {
 					ctx.beginPath();
-					console.log("X: "+missile.y+" Y: "+missile.y);
 					ctx.rect(missile.x, missile.y, missileWidth, missileHeight);
 					ctx.fillStyle = "#F188C1";
 					ctx.fill();
 					ctx.closePath();
 				}
+				if(missile.x > canvas.width + missileSpace) {
+					missiles.splice(m, 1);
+				}
 			}
 		}
+	}
+
+	function drawEnemies() {
+		var elapsed = (new Date() - start)/1000;
+		for(var e=0;e<enemies.length;e++) {
+			enemy = enemies[e];
+			if(elapsed >= enemy.timing && enemy.x + enemy.width > 0) {
+				ctx.beginPath();
+				ctx.rect(enemy.x, enemy.y, enemyWidth, enemyHeight);
+				ctx.fillStyle = "green";
+				ctx.fill();
+				ctx.closePath();
+				enemy.x -= enemySpeed;
+			}
+			if(enemy.x + enemy.width <= 0) {
+				enemies.splice(e, 1);
+			}
+		}
+		if(enemies.length === 0 && zigzagEnemies.length === 0) {
+			gameWon = true;
+		}
+	}
+
+	function drawZigzagEnemies() {
+		var elapsed = (new Date() - start)/1000;
+		for(var z=0;z<zigzagEnemies.length;z++) {
+			var enemy = zigzagEnemies[z];
+			if(elapsed >= enemy.timing && enemy.x + enemy.width > 0) {
+				ctx.beginPath();
+				ctx.rect(enemy.x, enemy.y, zigzagEnemyWidth, zigzagEnemyHeight);
+				ctx.fillStyle = "purple";
+				ctx.fill();
+				ctx.closePath();
+				enemy.x -= zigzagEnemyXSpeed;
+				if(enemy.y + enemy.ySpeed > canvas.height) {
+					enemy.ySpeed = -enemy.ySpeed;
+				} else if(enemy.y + enemy.ySpeed < 0) {
+					enemy.ySpeed = -enemy.ySpeed;
+				} else if(Math.abs(enemy.y - enemy.originalY) > verticalMovement) {
+					enemy.ySpeed = -enemy.ySpeed;
+				}
+				enemy.y += enemy.ySpeed;
+			}
+			if(enemy.x + enemy.width <= 0) {
+				enemies.splice(e, 1);
+			}
+		}
+	}
+
+	function drawScore() {
+		ctx.beginPath();
+		ctx.font = "16px Helvetica";
+		ctx.fillStyle = "#0095DD";
+		ctx.fillText("Score: "+score, 8, 20);
+	}
+
+	function drawLives() {
+		ctx.beginPath();
+		ctx.font = "16px Helvetica";
+		ctx.fillStyle = "#0095DD";
+		ctx.fillText("Lives: "+lives, canvas.width-65, 20);
 	}
 
 	function missileMovement() {
 		for(var x=0;x<missiles.length;x++) {
 			missile = missiles[x];
-			missile.x += missileSpeed;
+			if(missile.x < canvas.width + missileSpace) {
+				missile.x += missileSpeed;
+			}
 		}
 	}
 
@@ -144,8 +315,15 @@
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		drawShip();
 		drawMissiles();
+		drawEnemies();
+		drawZigzagEnemies();
+		drawLives();
+		drawScore();
 		missileMovement();
 		buttonActions();
+		checkTouchable();
+		shipCollisionDetection();
+		missileCollisionDetection();
 
 		requestAnimationFrame(draw);
 	}
