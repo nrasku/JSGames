@@ -49,11 +49,10 @@
 	var enemies = [];
 	for(var e=0;e<15;e++) {
 		enemies.push({x: enemyX, y: _.sample(enemyYPositions), height: enemyHeight, width: enemyWidth, 
-						speed: enemySpeed, timing: _.sample(enemyTimer), onField: true});
+						timing: _.sample(enemyTimer), onField: true});
 	}
 
 	var zigzagEnemyTimer = _.range(10, 21);
-	var zigzagEnemyX = canvas.width + 50;
 	var zigzagEnemyHeight = 10;
 	var zigzagEnemyWidth = 20;
 	var zigzagEnemyXSpeed = 2;
@@ -62,9 +61,20 @@
 	var zigzagEnemies = [];
 	for(var e=0;e<6;e++) {
 		var originalY = _.sample(enemyYPositions);
-		zigzagEnemies.push({x: zigzagEnemyX, y: originalY, height: zigzagEnemyHeight, width: zigzagEnemyWidth, 
+		zigzagEnemies.push({x: enemyX, y: originalY, height: zigzagEnemyHeight, width: zigzagEnemyWidth, 
 							timing: _.sample(zigzagEnemyTimer), ySpeed: zigzagEnemyYSpeed, originalY: originalY, onField: true});
 
+	}
+
+	var shootingEnemyTimer = _.range(15, 25);
+	var shootingEnemyWidth = 8;
+	var shootingEnemyHeight = 6;
+	var shootingEnemySpeed = 1;
+	var missileTiming = 100;
+	var shootingEnemies = [];
+	for(var s=0;s<4;s++) {
+		shootingEnemies.push({x: enemyX, y: _.sample(enemyYPositions), height: shootingEnemyHeight, width: shootingEnemyWidth,
+								timing: _.sample(shootingEnemyTimer), onField: true, missiles: []});
 	}
 
 	var upPressed = false;
@@ -143,6 +153,14 @@
 	function fire() {
 		if(missiles.length === 0 || missiles[missiles.length-1].x - missiles[missiles.length-1].originalX > missileSpace) {
 			missiles.push({x: missileX, y: missileY, originalX: missileX});
+		}
+	}
+
+	function enemyFire(enemy) {
+		var m = enemy.missiles;
+		if(m.length === 0 || m[m.length-1].originalX - m[m.length-1].x > missileTiming) {
+			var yPos = enemy.y + enemy.height/2;
+			m.push({x: enemy.x, y: yPos, originalX: enemy.x});
 		}
 	}
 
@@ -265,12 +283,6 @@
 		for(var z=0;z<zigzagEnemies.length;z++) {
 			var enemy = zigzagEnemies[z];
 			if(elapsed >= enemy.timing && enemy.x + enemy.width > 0) {
-				ctx.beginPath();
-				ctx.rect(enemy.x, enemy.y, zigzagEnemyWidth, zigzagEnemyHeight);
-				ctx.fillStyle = "purple";
-				ctx.fill();
-				ctx.closePath();
-				enemy.x -= zigzagEnemyXSpeed;
 				if(enemy.y + enemy.ySpeed > canvas.height) {
 					enemy.ySpeed = -enemy.ySpeed;
 				} else if(enemy.y + enemy.ySpeed < 0) {
@@ -278,10 +290,53 @@
 				} else if(Math.abs(enemy.y - enemy.originalY) > verticalMovement) {
 					enemy.ySpeed = -enemy.ySpeed;
 				}
+				ctx.beginPath();
+				ctx.rect(enemy.x, enemy.y, zigzagEnemyWidth, zigzagEnemyHeight);
+				ctx.fillStyle = "purple";
+				ctx.fill();
+				ctx.closePath();
+				enemy.x -= zigzagEnemyXSpeed;
 				enemy.y += enemy.ySpeed;
 			}
 			if(enemy.x + enemy.width <= 0) {
 				zigzagEnemies.splice(z, 1);
+			}
+		}
+	}
+
+	function drawShootingEnemies() {
+		var elapsed = (new Date() - start)/1000;
+		for(var s=0;s<shootingEnemies.length;s++) {
+			var enemy = shootingEnemies[s];
+			if(elapsed >= enemy.timing && enemy.x + enemy.width > 0) {
+				ctx.beginPath();
+				ctx.rect(enemy.x, enemy.y, enemy.width, enemy.height);
+				ctx.fillStyle = "#00478A";
+				ctx.fill();
+				ctx.closePath();
+				enemy.x -= shootingEnemySpeed;
+				enemyFire(enemy);
+				drawEnemyMissiles(enemy);
+				enemyMissileMovement(enemy);
+			}
+		}
+	}
+
+	function drawEnemyMissiles(enemy) {
+		var m = enemy.missiles
+		if(m.length > 0) {
+			for(var x=0;x<m.length;x++) {
+				missile = m[x];
+				if(missile.x < canvas.width + missileSpace) {
+					ctx.beginPath();
+					ctx.rect(missile.x, missile.y, missileWidth, missileHeight);
+					ctx.fillStyle = "#00478A";
+					ctx.fill();
+					ctx.closePath();
+				}
+				if(missile.x + missile.width < 0) {
+					m.splice(x, 1);
+				}
 			}
 		}
 	}
@@ -324,12 +379,22 @@
 		}
 	}
 
+	function enemyMissileMovement(enemy) {
+		for(var m=0;m<enemy.missiles.length;m++) {
+			var missile = enemy.missiles[m];
+			if(missile.x < canvas.width + missileTiming) {
+				missile.x -= missileSpeed;
+			}
+		}
+	}
+
 	function draw() {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		drawShip();
 		drawMissiles();
 		drawEnemies();
 		drawZigzagEnemies();
+		drawShootingEnemies();
 		drawLives();
 		drawScore();
 		drawGameState();
