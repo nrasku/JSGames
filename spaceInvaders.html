@@ -160,7 +160,7 @@
 		var m = enemy.missiles;
 		if(m.length === 0 || m[m.length-1].originalX - m[m.length-1].x > missileTiming) {
 			var yPos = enemy.y + enemy.height/2;
-			m.push({x: enemy.x, y: yPos, originalX: enemy.x});
+			m.push({x: enemy.x, y: yPos, originalX: enemy.x, width: missileWidth, height: missileHeight});
 		}
 	}
 
@@ -175,18 +175,12 @@
 		}
 		for(var s=0;s<shootingEnemies.length;s++) {
 			var enemy = shootingEnemies[s];
+			var enemyMissiles = enemy.missiles;
 			shipEnemyCollisionDetection(enemy);
-		}
-	}
-
-	function missileCollisionDetection() {
-		for(var x=0;x<enemies.length;x++) {
-			var enemy = enemies[x];
-			missileEnemyCollisionDetection(enemy, enemies, x);
-		}
-		for(var z=0;z<zigzagEnemies.length;z++) {
-			var enemy = zigzagEnemies[z];
-			missileEnemyCollisionDetection(enemy, zigzagEnemies, z);
+			for(var m=0;m<enemyMissiles.length;m++) {
+				var missile = enemyMissiles[m];
+				shipEnemyCollisionDetection(missile);
+			}
 		}
 	}
 
@@ -202,6 +196,21 @@
 				shipX = 10;
 				shipY = canvas.height/2; 
 			}
+		}
+	}
+
+	function missileCollisionDetection() {
+		for(var x=0;x<enemies.length;x++) {
+			var enemy = enemies[x];
+			missileEnemyCollisionDetection(enemy, enemies, x);
+		}
+		for(var z=0;z<zigzagEnemies.length;z++) {
+			var enemy = zigzagEnemies[z];
+			missileEnemyCollisionDetection(enemy, zigzagEnemies, z);
+		}
+		for(var s=0;s<shootingEnemies.length;s++) {
+			var enemy = shootingEnemies[s];
+			missileEnemyCollisionDetection(enemy, shootingEnemies, s);
 		}
 	}
 
