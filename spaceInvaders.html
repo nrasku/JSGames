@@ -67,10 +67,10 @@
 	}
 
 	var shootingEnemyTimer = _.range(15, 25);
-	var shootingEnemyWidth = 8;
-	var shootingEnemyHeight = 6;
+	var shootingEnemyWidth = 14;
+	var shootingEnemyHeight = 10;
 	var shootingEnemySpeed = 1;
-	var missileTiming = 100;
+	var missileTiming = 300;
 	var shootingEnemies = [];
 	for(var s=0;s<4;s++) {
 		shootingEnemies.push({x: enemyX, y: _.sample(enemyYPositions), height: shootingEnemyHeight, width: shootingEnemyWidth,
@@ -173,6 +173,10 @@
 			var enemy = zigzagEnemies[z];
 			shipEnemyCollisionDetection(enemy);
 		}
+		for(var s=0;s<shootingEnemies.length;s++) {
+			var enemy = shootingEnemies[s];
+			shipEnemyCollisionDetection(enemy);
+		}
 	}
 
 	function missileCollisionDetection() {
@@ -187,8 +191,8 @@
 	}
 
 	function shipEnemyCollisionDetection(enemy) {
-		if(shipX + shipWidth > enemy.x && shipX < enemy.x + enemyWidth && 
-			shipY + shipHeight > enemy.y && shipY < enemy.y + enemyHeight && touchable) {
+		if(shipX + shipWidth > enemy.x && shipX < enemy.x + enemy.width && 
+			shipY + shipHeight > enemy.y && shipY < enemy.y + enemy.height && touchable) {
 			lives -= 1;
 			touchable = false;
 			blinkTimer = new Date();
