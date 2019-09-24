@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <title>Gamedev Canvas Workshop</title>
     <script type="text/javascript" src="./underscore-min.js"></script>
+    <script type="text/javascript" src="./explosionParticles.js"></script>
     <style>
     	* { padding: 0; margin: 0; }
     	canvas { background: #eee; display: block; margin: 0 auto; }
@@ -167,29 +168,31 @@
 	function shipCollisionDetection() {
 		for(var x=0;x<enemies.length;x++) {
 			var enemy = enemies[x];
-			shipEnemyCollisionDetection(enemy);
+			shipEnemyCollisionDetection(enemy, enemies, x);
 		}
 		for(var z=0;z<zigzagEnemies.length;z++) {
 			var enemy = zigzagEnemies[z];
-			shipEnemyCollisionDetection(enemy);
+			shipEnemyCollisionDetection(enemy, zigzagEnemies, z);
 		}
 		for(var s=0;s<shootingEnemies.length;s++) {
 			var enemy = shootingEnemies[s];
 			var enemyMissiles = enemy.missiles;
-			shipEnemyCollisionDetection(enemy);
+			shipEnemyCollisionDetection(enemy, shootingEnemies, s);
 			for(var m=0;m<enemyMissiles.length;m++) {
 				var missile = enemyMissiles[m];
-				shipEnemyCollisionDetection(missile);
+				shipEnemyCollisionDetection(missile, enemyMissiles, m);
 			}
 		}
 	}
 
-	function shipEnemyCollisionDetection(enemy) {
+	function shipEnemyCollisionDetection(enemy, enemyArray, index) {
 		if(shipX + shipWidth > enemy.x && shipX < enemy.x + enemy.width && 
 			shipY + shipHeight > enemy.y && shipY < enemy.y + enemy.height && touchable) {
 			lives -= 1;
 			touchable = false;
 			blinkTimer = new Date();
+			explode(enemy.x, enemy.y);
+			enemyArray.splice(index, 1);
 			if(!lives) {
 				gameOver = true;
 			} else {
@@ -219,6 +222,7 @@
 			var missile = missiles[m];
 			if(missile.x + missileWidth > enemy.x && missile.x < enemy.x + enemy.width && 
 				missile.y + missileHeight > enemy.y && missile.y < enemy.y + enemyHeight) {
+				explode(enemy.x, enemy.y);
 				missiles.splice(m, 1);
 				enemyArray.splice(enemyIndex, 1);
 				score += 1;
@@ -286,7 +290,7 @@
 				enemies.splice(e, 1);
 			}
 		}
-		if(enemies.length === 0 && zigzagEnemies.length === 0) {
+		if(enemies.length === 0 && zigzagEnemies.length === 0 && shootingEnemies.length === 0) {
 			gameWon = true;
 		}
 	}
@@ -401,7 +405,7 @@
 		}
 	}
 
-	function draw() {
+	function loop() {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		drawShip();
 		drawMissiles();
@@ -416,11 +420,15 @@
 		checkTouchable();
 		shipCollisionDetection();
 		missileCollisionDetection();
+		for(var i=0;i<particles.length;i++) {
+			particles[i].draw();
+			particles[i].update();
+		}
 
-		requestAnimationFrame(draw);
+		requestAnimationFrame(loop);
 	}
 
-	draw();
+	loop();
 
 </script>
 
