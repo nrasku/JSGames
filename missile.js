@@ -27,6 +27,10 @@ Missile.prototype.update = function() {
 	}
 }
 
+Missile.prototype.outOfBounds = function() {
+	return this.x > canvas.width + this.timing || this.x + this.width < 0
+}
+
 function shipFire() {
 	let missile = {
 		x: ship.x,
@@ -36,8 +40,8 @@ function shipFire() {
 		speed: 3,
 		timing: 50,
 		enemyFire: false
-	}
-	missiles.push(new Missile(missile))
+	};
+	missiles.push(new Missile(missile));
 }
 
 function enemyFire(enemy) {
@@ -49,5 +53,6 @@ function enemyFire(enemy) {
 		speed: -3,
 		timing: 50,
 		enemyFire: true
-    }
+    };
+    missiles.push(new Missile(missile));
 }
