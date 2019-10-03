@@ -51,7 +51,6 @@ Ship.prototype.update = function(x, y) {
 }
 
 Ship.prototype.hitByEnemy = function(enemy, enemyArray, index) {
-	console.log("I'm HIT!!!!")
     if(this.x + this.width > enemy.x && this.x < enemy.x + enemy.width && 
 		this.y + this.height > enemy.y && this.y < enemy.y + enemy.height && this.touchable) {
 		this.lives -= 1;
