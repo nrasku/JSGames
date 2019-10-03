@@ -5,6 +5,7 @@
     <title>Gamedev Canvas Workshop</title>
     <script type="text/javascript" src="./underscore-min.js"></script>
     <script type="text/javascript" src="./explosionParticles.js"></script>
+    <script type="text/javascript" src="./ship.js"></script>
     <style>
     	* { padding: 0; margin: 0; }
     	canvas { background: #eee; display: block; margin: 0 auto; }
@@ -23,18 +24,10 @@
 	var gameOver = false;
 	var gameWon = false;
 
-	var shipX = 10;
-	var shipY = canvas.height / 2;
-	var shipHeight = 10;
-	var shipWidth = 20;
-	var shipSpeed = 2;
-	var lives = 3;
-	var touchable = true;
-	var blinkTimer = null;
-	var blinkTime = 5;
+	var ship = new Ship(30, canvas.height/2);
 
-	var missileX = shipX + shipWidth;
-	var missileY = shipY + shipHeight/2;
+	var missileX = ship.x + ship.width;
+	var missileY = ship.y + ship.height/2;
 	var missileHeight = 2;
 	var missileWidth = 5;
 	var missileSpeed = 3;
@@ -117,36 +110,24 @@
 
 	function buttonActions() {
 		if(upPressed) {
-			shipY -= shipSpeed;
-			if(shipY < 0) {
-				shipY = 0;
-			}
+			ship.update(0, -ship.speed);
 		}
 
 		if(downPressed) {
-			shipY += shipSpeed;
-			if(shipY + shipHeight > canvas.height) {
-				shipY = canvas.height - shipHeight;
-			}
+			ship.update(0, ship.speed);
 		} 
 
 		if(rightPressed) {
-			shipX += shipSpeed;
-			if(shipX + shipWidth > canvas.width) {
-				shipX = canvas.width - shipWidth;
-			}
+			ship.update(ship.speed, 0);
 		} 
 
 		if(leftPressed) {
-			shipX -= shipSpeed;
-			if(shipX < 0) {
-				shipX = 0;
-			}
+			ship.update(-ship.speed, 0);
 		}
 
 		if(spacePressed) {
-			missileX = shipX + shipWidth;
-			missileY = shipY + shipHeight/2;
+			missileX = ship.x + ship.width;
+			missileY = ship.y + ship.height/2;
 			fire();
 		}
 	}
@@ -168,36 +149,19 @@
 	function shipCollisionDetection() {
 		for(var x=0;x<enemies.length;x++) {
 			var enemy = enemies[x];
-			shipEnemyCollisionDetection(enemy, enemies, x);
+			ship.hitByEnemy(enemy, enemies, x);
 		}
 		for(var z=0;z<zigzagEnemies.length;z++) {
 			var enemy = zigzagEnemies[z];
-			shipEnemyCollisionDetection(enemy, zigzagEnemies, z);
+			ship.hitByEnemy(enemy, zigzagEnemies, z);
 		}
 		for(var s=0;s<shootingEnemies.length;s++) {
 			var enemy = shootingEnemies[s];
 			var enemyMissiles = enemy.missiles;
-			shipEnemyCollisionDetection(enemy, shootingEnemies, s);
+			ship.hitByEnemy(enemy, shootingEnemies, s);
 			for(var m=0;m<enemyMissiles.length;m++) {
 				var missile = enemyMissiles[m];
-				shipEnemyCollisionDetection(missile, enemyMissiles, m);
-			}
-		}
-	}
-
-	function shipEnemyCollisionDetection(enemy, enemyArray, index) {
-		if(shipX + shipWidth > enemy.x && shipX < enemy.x + enemy.width && 
-			shipY + shipHeight > enemy.y && shipY < enemy.y + enemy.height && touchable) {
-			lives -= 1;
-			touchable = false;
-			blinkTimer = new Date();
-			explode(enemy.x, enemy.y);
-			enemyArray.splice(index, 1);
-			if(!lives) {
-				gameOver = true;
-			} else {
-				shipX = 10;
-				shipY = canvas.height/2; 
+				ship.hitByEnemy(missile, enemyMissiles, m);
 			}
 		}
 	}
@@ -227,32 +191,6 @@
 				enemyArray.splice(enemyIndex, 1);
 				score += 1;
 			}
-		}
-	}
-
-	function checkTouchable() {
-		var elapsed = (new Date() - blinkTimer)/1000;
-		if(elapsed >= blinkTime) {
-			touchable = true;
-			blinkTimer = null;
-		}
-	}
-
-	function drawShip() {
-		var elapsed = (new Date() - blinkTimer)/1000;
-		var decimal = Math.round(elapsed * 10);
-		if(!blinkTimer || decimal % 2 == 1) {
-			ctx.beginPath();
-			ctx.rect(shipX, shipY, shipWidth, shipHeight);
-			ctx.fillStyle = "#F00000";
-			ctx.fill();
-			ctx.closePath();
-		} else {
-			ctx.beginPath();
-			ctx.rect(shipX, shipY, shipWidth, shipHeight);
-			ctx.fillStyle = "#FFD9D9";
-			ctx.fill();
-			ctx.closePath();
 		}
 	}
 
@@ -336,6 +274,9 @@
 				drawEnemyMissiles(enemy);
 				enemyMissileMovement(enemy);
 			}
+			if(enemy.x + enemy.width <= 0) {
+				shootingEnemies.splice(s, 1);
+			}
 		}
 	}
 
@@ -369,7 +310,7 @@
 		ctx.beginPath();
 		ctx.font = "16px Helvetica";
 		ctx.fillStyle = "#0095DD";
-		ctx.fillText("Lives: "+lives, canvas.width-65, 20);
+		ctx.fillText("Lives: "+ship.lives, canvas.width-65, 20);
 	}
 
 	function drawGameState() {
@@ -407,7 +348,6 @@
 
 	function loop() {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		drawShip();
 		drawMissiles();
 		drawEnemies();
 		drawZigzagEnemies();
@@ -417,14 +357,13 @@
 		drawGameState();
 		missileMovement();
 		buttonActions();
-		checkTouchable();
 		shipCollisionDetection();
 		missileCollisionDetection();
 		for(var i=0;i<particles.length;i++) {
 			particles[i].draw();
 			particles[i].update();
 		}
-
+		ship.draw();
 		requestAnimationFrame(loop);
 	}
 
