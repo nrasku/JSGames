@@ -6,6 +6,7 @@
     <script type="text/javascript" src="./underscore-min.js"></script>
     <script type="text/javascript" src="./explosionParticles.js"></script>
     <script type="text/javascript" src="./ship.js"></script>
+    <script type="text/javascript" src="./missile.js"></script>
     <style>
     	* { padding: 0; margin: 0; }
     	canvas { background: #eee; display: block; margin: 0 auto; }
@@ -31,7 +32,7 @@
 	var missileHeight = 2;
 	var missileWidth = 5;
 	var missileSpeed = 3;
-	var missiles = [{x: missileX, y: missileY, originalX: missileX}];
+	var missiles = [];
 	var missileSpace = 35;
 
 	var enemyYPositions = [40, 80, 120, 160, 200, 240, 280, 320, 360];
@@ -126,15 +127,9 @@
 		}
 
 		if(spacePressed) {
-			missileX = ship.x + ship.width;
-			missileY = ship.y + ship.height/2;
-			fire();
-		}
-	}
-
-	function fire() {
-		if(missiles.length === 0 || missiles[missiles.length-1].x - missiles[missiles.length-1].originalX > missileSpace) {
-			missiles.push({x: missileX, y: missileY, originalX: missileX});
+			if(shipCanFire) {
+				shipFire();
+			}
 		}
 	}
 

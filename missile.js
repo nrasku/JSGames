@@ -1,6 +1,10 @@
+const shipFireRate = 50;
+const enemyFireRate = 300;
+
 function Missile(missile) {
     this.x = missile.x;
     this.y = missile.y;
+    this.originalX = missile.x;
     this.width = missile.width;
     this.height = missile.height;
     this.timing = missile.timing;
@@ -12,7 +16,7 @@ Missile.prototype.draw = function() {
 	if(this.x < canvas.width + this.timing) {
 		ctx.beginPath();
 		ctx.rect(this.x, this.y, this.width, this.height);
-		ctx.fillStyle = "#F188C1";
+		ctx.fillStyle = "#86EB34";
 		ctx.fill();
 		ctx.closePath();
 	}
@@ -31,10 +35,14 @@ Missile.prototype.outOfBounds = function() {
 	return this.x > canvas.width + this.timing || this.x + this.width < 0
 }
 
+function fireRate() {
+	missiles.length === 0 || missiles[missiles.length-1].x - missiles[missiles.length-1].originalX > shipFireRate
+}
+
 function shipFire() {
 	let missile = {
 		x: ship.x,
-		y: ship.y,
+		y: ship.y + ship.height/2,
 		width: 5,
 		height: 2,
 		speed: 3,
