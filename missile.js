@@ -35,8 +35,13 @@ Missile.prototype.outOfBounds = function() {
 	return this.x > canvas.width + this.timing || this.x + this.width < 0
 }
 
-function fireRate() {
-	missiles.length === 0 || missiles[missiles.length-1].x - missiles[missiles.length-1].originalX > shipFireRate
+function shipCanFire() {
+	return missiles.length === 0 || missiles[missiles.length-1].x - missiles[missiles.length-1].originalX > shipFireRate
+}
+
+function enemyCanFire() {
+	let len = enemyMissiles.legth;
+	return enemyMissiles.length === 0 || enemyMissiles[len-1].originalX - enemyMissiles[len-1].x > missileTiming
 }
 
 function shipFire() {
@@ -62,5 +67,5 @@ function enemyFire(enemy) {
 		timing: 50,
 		enemyFire: true
     };
-    missiles.push(new Missile(missile));
+    enemyMissiles.push(new Missile(missile));
 }
