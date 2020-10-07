@@ -63,6 +63,7 @@ function enemyFire(enemy) {
     let missile = {
     	x: enemy.x,
 		y: enemy.y,
+		originalX: enemy.x,
 		width: 5,
 		height: 2,
 		speed: -3,
