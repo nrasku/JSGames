@@ -6,7 +6,11 @@
     <script type="text/javascript" src="./underscore-min.js"></script>
     <script type="text/javascript" src="./explosionParticles.js"></script>
     <script type="text/javascript" src="./ship.js"></script>
-    <script type="text/javascript" src="./missile.js"></script>
+	<script type="text/javascript" src="./missile.js"></script>
+	<script type="text/javascript" src="./enemies/enemy.js"></script>
+	<script type="text/javascript" src="./enemies/standardEnemy.js"></script>
+	<script type="text/javascript" src="./enemies/zigzagEnemy.js"></script>
+	<script type="text/javascript" src="./enemies/shootingEnemy.js"></script>
     <style>
     	* { padding: 0; margin: 0; }
     	canvas { background: #eee; display: block; margin: 0 auto; }
@@ -179,11 +183,13 @@
 	function missileEnemyCollisionDetection(enemy, enemyArray, enemyIndex) {
 		for(var m=0;m<missiles.length;m++) {
 			var missile = missiles[m];
-			if(missile.x + missileWidth > enemy.x && missile.x < enemy.x + enemy.width && 
+			if(!enemy.onField) {
+				continue;
+			} else if(missile.x + missileWidth > enemy.x && missile.x < enemy.x + enemy.width && 
 				missile.y + missileHeight > enemy.y && missile.y < enemy.y + enemyHeight) {
 				explode(enemy.x, enemy.y);
 				missiles.splice(m, 1);
-				enemyArray.splice(enemyIndex, 1);
+				enemy.onField = false;
 				score += 1;
 			}
 		}
@@ -211,18 +217,20 @@
 		var elapsed = (new Date() - start)/1000;
 		for(var e=0;e<enemies.length;e++) {
 			enemy = enemies[e];
-			if(elapsed >= enemy.timing && enemy.x + enemy.width > 0) {
+			if(!enemy.onField) {
+				continue;
+			} else if(elapsed >= enemy.timing && enemy.x + enemy.width > 0) {
 				ctx.beginPath();
 				ctx.rect(enemy.x, enemy.y, enemyWidth, enemyHeight);
 				ctx.fillStyle = "green";
 				ctx.fill();
 				ctx.closePath();
 				enemy.x -= enemySpeed;
-			}
-			if(enemy.x + enemy.width <= 0) {
+			} else if(enemy.x + enemy.width <= 0) {
 				enemies.splice(e, 1);
 			}
 		}
+
 		if(enemies.length === 0 && zigzagEnemies.length === 0 && shootingEnemies.length === 0) {
 			gameWon = true;
 		}
@@ -232,7 +240,9 @@
 		var elapsed = (new Date() - start)/1000;
 		for(var z=0;z<zigzagEnemies.length;z++) {
 			var enemy = zigzagEnemies[z];
-			if(elapsed >= enemy.timing && enemy.x + enemy.width > 0) {
+			if(!enemy.onField) {
+			    continue;
+			} else if(elapsed >= enemy.timing && enemy.x + enemy.width > 0) {
 				if(enemy.y + enemy.ySpeed > canvas.height) {
 					enemy.ySpeed = -enemy.ySpeed;
 				} else if(enemy.y + enemy.ySpeed < 0) {
@@ -247,8 +257,7 @@
 				ctx.closePath();
 				enemy.x -= zigzagEnemyXSpeed;
 				enemy.y += enemy.ySpeed;
-			}
-			if(enemy.x + enemy.width <= 0) {
+			} else if(enemy.x + enemy.width <= 0) {
 				zigzagEnemies.splice(z, 1);
 			}
 		}
@@ -258,7 +267,11 @@
 		var elapsed = (new Date() - start)/1000;
 		for(var s=0;s<shootingEnemies.length;s++) {
 			var enemy = shootingEnemies[s];
-			if(elapsed >= enemy.timing && enemy.x + enemy.width > 0) {
+			if(!enemy.onField) {
+				drawEnemyMissiles(enemy);
+				enemyMissileMovement(enemy);
+				continue;
+			} else if(elapsed >= enemy.timing && enemy.x + enemy.width > 0) {
 				ctx.beginPath();
 				ctx.rect(enemy.x, enemy.y, enemy.width, enemy.height);
 				ctx.fillStyle = "#00478A";
@@ -268,15 +281,14 @@
 				enemyFire(enemy);
 				drawEnemyMissiles(enemy);
 				enemyMissileMovement(enemy);
-			}
-			if(enemy.x + enemy.width <= 0) {
+			} else if(enemy.x + enemy.width <= 0) {
 				shootingEnemies.splice(s, 1);
 			}
 		}
 	}
 
 	function drawEnemyMissiles(enemy) {
-		var m = enemy.missiles
+		var m = enemy.missiles;
 		if(m.length > 0) {
 			for(var x=0;x<m.length;x++) {
 				missile = m[x];
@@ -286,8 +298,7 @@
 					ctx.fillStyle = "#00478A";
 					ctx.fill();
 					ctx.closePath();
-				}
-				if(missile.x + missile.width < 0) {
+				} else if(missile.x + missile.width < 0) {
 					m.splice(x, 1);
 				}
 			}

@@ -1,5 +1,5 @@
-const shipFireRate = 50;
-const enemyFireRate = 300;
+const SHIP_FIRE_RATE = 50;
+const ENEMY_FIRE_RATE = 300;
 
 function Missile(missile) {
     this.x = missile.x;
@@ -9,7 +9,8 @@ function Missile(missile) {
     this.height = missile.height;
     this.timing = missile.timing;
     this.speed = missile.speed;
-    this.enemyFire = missile.enemyFire;
+	this.enemyFire = missile.enemyFire;
+	this.onField = true;
 }
 
 Missile.prototype.draw = function() {
@@ -36,12 +37,12 @@ Missile.prototype.outOfBounds = function() {
 }
 
 function shipCanFire() {
-	return missiles.length === 0 || missiles[missiles.length-1].x - missiles[missiles.length-1].originalX > shipFireRate
+	return missiles.length === 0 || missiles[missiles.length-1].x - missiles[missiles.length-1].originalX > SHIP_FIRE_RATE
 }
 
 function enemyCanFire() {
 	let len = enemyMissiles.legth;
-	return enemyMissiles.length === 0 || enemyMissiles[len-1].originalX - enemyMissiles[len-1].x > missileTiming
+	return enemyMissiles.length === 0 || enemyMissiles[len-1].originalX - enemyMissiles[len-1].x > ENEMY_FIRE_RATE
 }
 
 function shipFire() {
@@ -52,7 +53,8 @@ function shipFire() {
 		height: 2,
 		speed: 3,
 		timing: 50,
-		enemyFire: false
+		enemyFire: false,
+		onField: true
 	};
 	missiles.push(new Missile(missile));
 }
@@ -65,7 +67,8 @@ function enemyFire(enemy) {
 		height: 2,
 		speed: -3,
 		timing: 50,
-		enemyFire: true
+		enemyFire: true,
+		onField: true
     };
     enemyMissiles.push(new Missile(missile));
 }

@@ -51,13 +51,15 @@ Ship.prototype.update = function(x, y) {
 }
 
 Ship.prototype.hitByEnemy = function(enemy, enemyArray, index) {
-    if(this.x + this.width > enemy.x && this.x < enemy.x + enemy.width && 
+	if(!enemy.onField) {
+		return null;
+	} else if(this.x + this.width > enemy.x && this.x < enemy.x + enemy.width && 
 		this.y + this.height > enemy.y && this.y < enemy.y + enemy.height && this.touchable) {
 		this.lives -= 1;
 		this.touchable = false;
 		this.blinkTimer = new Date();
 		explode(enemy.x, enemy.y);
-		enemyArray.splice(index, 1);
+		enemy.onField = false;
 		if(!this.lives) {
 			gameOver = true;
 		} else {
