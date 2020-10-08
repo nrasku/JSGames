@@ -38,7 +38,8 @@ Missile.prototype.outOfBounds = function() {
 }
 
 function shipCanFire() {
-	return missiles.length === 0 || missiles[missiles.length-1].x - missiles[missiles.length-1].originalX > SHIP_FIRE_RATE
+	let onFieldMissiles = missiles.filter(function(m) { return m.onField; });
+	return onFieldMissiles.length === 0 || onFieldMissiles[onFieldMissiles.length-1].x - onFieldMissiles[onFieldMissiles.length-1].originalX > SHIP_FIRE_RATE
 }
 
 function enemyCanFire(enemy) {
