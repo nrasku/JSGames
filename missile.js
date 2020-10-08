@@ -20,14 +20,15 @@ Missile.prototype.draw = function() {
 		ctx.fillStyle = "#86EB34";
 		ctx.fill();
 		ctx.closePath();
-	}
-	if(this.x > canvas.width + this.timing) {
-		missiles.splice(m, 1);
+	} else if(this.x > canvas.width + this.timing) {
+		this.onField = false;
 	}
 }
 
 Missile.prototype.update = function() {
-    if(this.x < canvas.width + this.timing) {
+	if(!this.onField) {
+		return null;
+	} else if(this.x < canvas.width + this.timing) {
 		this.x += this.speed;
 	}
 }
@@ -40,9 +41,9 @@ function shipCanFire() {
 	return missiles.length === 0 || missiles[missiles.length-1].x - missiles[missiles.length-1].originalX > SHIP_FIRE_RATE
 }
 
-function enemyCanFire() {
-	let len = enemyMissiles.legth;
-	return enemyMissiles.length === 0 || enemyMissiles[len-1].originalX - enemyMissiles[len-1].x > ENEMY_FIRE_RATE
+function enemyCanFire(enemy) {
+	let len = enemy.missiles.legth;
+	return enemy.missiles.length === 0 || enemy.missiles[len-1].originalX - enemy.missiles[len-1].x > ENEMY_FIRE_RATE
 }
 
 function shipFire() {
@@ -71,5 +72,5 @@ function enemyFire(enemy) {
 		enemyFire: true,
 		onField: true
     };
-    enemyMissiles.push(new Missile(missile));
+	enemy.missiles.push(new Missile(missile));
 }

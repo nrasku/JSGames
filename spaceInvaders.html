@@ -141,7 +141,7 @@
 		var m = enemy.missiles;
 		if(m.length === 0 || m[m.length-1].originalX - m[m.length-1].x > missileTiming) {
 			var yPos = enemy.y + enemy.height/2;
-			m.push({x: enemy.x, y: yPos, originalX: enemy.x, width: missileWidth, height: missileHeight});
+			m.push({x: enemy.x, y: yPos, originalX: enemy.x, width: missileWidth, height: missileHeight, onField: true});
 		}
 	}
 
@@ -181,24 +181,26 @@
 	}
 
 	function missileEnemyCollisionDetection(enemy, enemyArray, enemyIndex) {
-		for(var m=0;m<missiles.length;m++) {
-			var missile = missiles[m];
-			if(!enemy.onField) {
+		let onFieldMissiles = onFieldCollection(missiles);
+		for(var m=0;m<onFieldMissiles.length;m++) {
+			var missile = onFieldMissiles[m];
+			if(!enemy.onField || !missile.onField) {
 				continue;
 			} else if(missile.x + missileWidth > enemy.x && missile.x < enemy.x + enemy.width && 
 				missile.y + missileHeight > enemy.y && missile.y < enemy.y + enemyHeight) {
 				explode(enemy.x, enemy.y);
-				missiles.splice(m, 1);
 				enemy.onField = false;
+				missile.onField = false;
 				score += 1;
 			}
 		}
 	}
 
 	function drawMissiles() {
-		if(missiles.length > 0) {
-			for(var m=0;m<missiles.length;m++) {
-				missile = missiles[m];
+		let onFieldMissiles = onFieldCollection(missiles);
+		if(onFieldMissiles.length > 0) {
+			for(var m=0;m<onFieldMissiles.length;m++) {
+				missile = onFieldMissiles[m];
 				if(missile.x < canvas.width + missileSpace) {
 					ctx.beginPath();
 					ctx.rect(missile.x, missile.y, missileWidth, missileHeight);
@@ -207,7 +209,7 @@
 					ctx.closePath();
 				}
 				if(missile.x > canvas.width + missileSpace) {
-					missiles.splice(m, 1);
+					missile.onField = false;
 				}
 			}
 		}
@@ -215,11 +217,10 @@
 
 	function drawEnemies() {
 		var elapsed = (new Date() - start)/1000;
-		for(var e=0;e<enemies.length;e++) {
-			enemy = enemies[e];
-			if(!enemy.onField) {
-				continue;
-			} else if(elapsed >= enemy.timing && enemy.x + enemy.width > 0) {
+		let onFieldEnemies = onFieldCollection(enemies);
+		for(var e=0;e<onFieldEnemies.length;e++) {
+			enemy = onFieldEnemies[e];
+			if(elapsed >= enemy.timing && enemy.x + enemy.width > 0) {
 				ctx.beginPath();
 				ctx.rect(enemy.x, enemy.y, enemyWidth, enemyHeight);
 				ctx.fillStyle = "green";
@@ -227,7 +228,7 @@
 				ctx.closePath();
 				enemy.x -= enemySpeed;
 			} else if(enemy.x + enemy.width <= 0) {
-				enemies.splice(e, 1);
+				enemy.onField = false;
 			}
 		}
 
@@ -238,11 +239,10 @@
 
 	function drawZigzagEnemies() {
 		var elapsed = (new Date() - start)/1000;
-		for(var z=0;z<zigzagEnemies.length;z++) {
-			var enemy = zigzagEnemies[z];
-			if(!enemy.onField) {
-			    continue;
-			} else if(elapsed >= enemy.timing && enemy.x + enemy.width > 0) {
+		let onFieldEnemies = onFieldCollection(zigzagEnemies);
+		for(var z=0;z<onFieldEnemies.length;z++) {
+			var enemy = onFieldEnemies[z];
+			if(elapsed >= enemy.timing && enemy.x + enemy.width > 0) {
 				if(enemy.y + enemy.ySpeed > canvas.height) {
 					enemy.ySpeed = -enemy.ySpeed;
 				} else if(enemy.y + enemy.ySpeed < 0) {
@@ -258,7 +258,7 @@
 				enemy.x -= zigzagEnemyXSpeed;
 				enemy.y += enemy.ySpeed;
 			} else if(enemy.x + enemy.width <= 0) {
-				zigzagEnemies.splice(z, 1);
+				enemy.onField = false;
 			}
 		}
 	}
@@ -282,13 +282,13 @@
 				drawEnemyMissiles(enemy);
 				enemyMissileMovement(enemy);
 			} else if(enemy.x + enemy.width <= 0) {
-				shootingEnemies.splice(s, 1);
+				enemy.onField = false;
 			}
 		}
 	}
 
 	function drawEnemyMissiles(enemy) {
-		var m = enemy.missiles;
+		let m = onFieldCollection(enemy.missiles);
 		if(m.length > 0) {
 			for(var x=0;x<m.length;x++) {
 				missile = m[x];
@@ -299,7 +299,7 @@
 					ctx.fill();
 					ctx.closePath();
 				} else if(missile.x + missile.width < 0) {
-					m.splice(x, 1);
+					missile.onField = false;
 				}
 			}
 		}
@@ -335,8 +335,9 @@
 	}
 
 	function missileMovement() {
-		for(var x=0;x<missiles.length;x++) {
-			missile = missiles[x];
+		let shipM = onFieldCollection(missiles)
+		for(var x=0;x<shipM.length;x++) {
+			missile = shipM[x];
 			if(missile.x < canvas.width + missileSpace) {
 				missile.x += missileSpeed;
 			}
@@ -344,11 +345,20 @@
 	}
 
 	function enemyMissileMovement(enemy) {
-		for(var m=0;m<enemy.missiles.length;m++) {
-			var missile = enemy.missiles[m];
+		let enemyM = onFieldCollection(enemy.missiles)
+		for(var m=0;m<enemyM.length;m++) {
+			var missile = enemyM[m];
 			if(missile.x < canvas.width + missileTiming) {
 				missile.x -= missileSpeed;
 			}
+		}
+	}
+
+	function onFieldCollection(array) {
+		if(array.length > 0) {
+			return array.filter(function(a) { return a.onField; });
+		} else {
+			return array
 		}
 	}
 
