@@ -68,3 +68,17 @@ Ship.prototype.hitByEnemy = function(enemy, enemyArray, index) {
 		}
 	}
 }
+
+Ship.prototype.fire = function() {
+	let missile = {
+		x: this.x,
+		y: this.y + this.height/2,
+		width: 5,
+		height: 2,
+		speed: 3,
+		timing: 50,
+		enemyFire: false,
+		onField: true
+	};
+	missiles.push(new Missile(missile));
+}

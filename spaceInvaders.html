@@ -40,40 +40,36 @@
 	var missileSpace = 35;
 
 	var enemyYPositions = [40, 80, 120, 160, 200, 240, 280, 320, 360];
-	var enemyTimer = _.range(1, 21);
+	var enemyTimer = _.range(1, 30);
 	var enemyX = canvas.width + 50;
 	var enemyHeight = 14;
 	var enemyWidth = 22;
 	var enemySpeed = 2;
 	var enemies = [];
-	for(var e=0;e<15;e++) {
+	for(var e=0;e<20;e++) {
 		enemies.push({x: enemyX, y: _.sample(enemyYPositions), height: enemyHeight, width: enemyWidth, 
 						timing: _.sample(enemyTimer), onField: true});
 	}
 
-	var zigzagEnemyTimer = _.range(10, 21);
+	var zigzagEnemyTimer = _.range(10, 40);
 	var zigzagEnemyHeight = 10;
 	var zigzagEnemyWidth = 20;
 	var zigzagEnemyXSpeed = 2;
 	var zigzagEnemyYSpeed = 2;
 	var verticalMovement = 40;
 	var zigzagEnemies = [];
-	for(var e=0;e<6;e++) {
+	for(var e=0;e<12;e++) {
 		var originalY = _.sample(enemyYPositions);
 		zigzagEnemies.push({x: enemyX, y: originalY, height: zigzagEnemyHeight, width: zigzagEnemyWidth, 
 							timing: _.sample(zigzagEnemyTimer), ySpeed: zigzagEnemyYSpeed, originalY: originalY, onField: true});
 
 	}
 
-	var shootingEnemyTimer = _.range(15, 25);
-	var shootingEnemyWidth = 14;
-	var shootingEnemyHeight = 10;
-	var shootingEnemySpeed = 1;
-	var missileTiming = 300;
+	var shootingEnemyTimer = _.range(30, 60);
 	var shootingEnemies = [];
-	for(var s=0;s<4;s++) {
-		shootingEnemies.push({x: enemyX, y: _.sample(enemyYPositions), height: shootingEnemyHeight, width: shootingEnemyWidth,
-								timing: _.sample(shootingEnemyTimer), onField: true, missiles: []});
+	for(var s=0;s<8;s++) {
+		let shooter = new ShootingEnemy({y: _.sample(enemyYPositions), timing: _.sample(shootingEnemyTimer), missiles: []});
+		shootingEnemies.push(shooter);
 	}
 
 	var upPressed = false;
@@ -132,16 +128,8 @@
 
 		if(spacePressed) {
 			if(shipCanFire()) {
-				shipFire();
+				ship.fire();
 			}
-		}
-	}
-
-	function enemyFire(enemy) {
-		var m = enemy.missiles;
-		if(m.length === 0 || m[m.length-1].originalX - m[m.length-1].x > missileTiming) {
-			var yPos = enemy.y + enemy.height/2;
-			m.push({x: enemy.x, y: yPos, originalX: enemy.x, width: missileWidth, height: missileHeight, onField: true});
 		}
 	}
 
@@ -231,10 +219,6 @@
 				enemy.onField = false;
 			}
 		}
-
-		if(enemies.length === 0 && zigzagEnemies.length === 0 && shootingEnemies.length === 0) {
-			gameWon = true;
-		}
 	}
 
 	function drawZigzagEnemies() {
@@ -272,13 +256,11 @@
 				enemyMissileMovement(enemy);
 				continue;
 			} else if(elapsed >= enemy.timing && enemy.x + enemy.width > 0) {
-				ctx.beginPath();
-				ctx.rect(enemy.x, enemy.y, enemy.width, enemy.height);
-				ctx.fillStyle = "#00478A";
-				ctx.fill();
-				ctx.closePath();
-				enemy.x -= shootingEnemySpeed;
-				enemyFire(enemy);
+				enemy.draw();
+				enemy.x -= enemy.speed;
+				if(enemy.canFire()) {
+					enemy.fire();
+				}
 				drawEnemyMissiles(enemy);
 				enemyMissileMovement(enemy);
 			} else if(enemy.x + enemy.width <= 0) {
@@ -348,8 +330,8 @@
 		let enemyM = onFieldCollection(enemy.missiles)
 		for(var m=0;m<enemyM.length;m++) {
 			var missile = enemyM[m];
-			if(missile.x < canvas.width + missileTiming) {
-				missile.x -= missileSpeed;
+			if(missile.x < canvas.width + enemy.missileTiming) {
+				missile.x -= enemy.missileSpeed;
 			}
 		}
 	}
@@ -359,6 +341,13 @@
 			return array.filter(function(a) { return a.onField; });
 		} else {
 			return array
+		}
+	}
+
+	function isGameWon() {
+		let onFieldEnemies = onFieldCollection(_.flatten(enemies, zigzagEnemies, shootingEnemies));
+		if (!(onFieldEnemies.length > 0)) {
+			gameWon = true;
 		}
 	}
 
@@ -380,6 +369,7 @@
 			particles[i].update();
 		}
 		ship.draw();
+		isGameWon();
 		requestAnimationFrame(loop);
 	}
 
