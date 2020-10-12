@@ -4,28 +4,19 @@ const ZIG_ZAG_WIDTH = 20;
 const X_SPEED = 2;
 const Y_SPEED = 2;
 const VERTICAL_MOVEMENT = 40;
+const ZIG_ZAG_COLOUR = "purple"
 
-function ZigZagEnemy(){
+function ZigZagEnemy(parameters){
+    let params = Object.assign(parameters, {height: ZIG_ZAG_HEIGHT, width: ZIG_ZAG_WIDTH, colour: ZIG_ZAG_COLOUR})
 
-    Enemy.call(this);
+    Enemy.call(this, params);
+
+    this.originalY = this.y;
+    this.ySpeed = Y_SPEED;
+    this.xSpeed = X_SPEED; 
+    this.verticalMovement = VERTICAL_MOVEMENT;
 }
 
 
 ZigZagEnemy.prototype = Object.create(Enemy.prototype);
 ZigZagEnemy.prototype.constructor = ZigZagEnemy;
-
-ZigZagEnemy.prototype.init = function(){
-
-    Enemy.prototype.call(this);
-}
-
-ZigZagEnemy.prototype.initWithParameters = function(parameters){
-
-    let params = Object.assign(parameters, {height: SHOOTING_HEIGHT, width: SHOOTING_WIDTH})
-
-    Enemy.prototype.initWithParameters.call(this, params);
-
-    this.ySpeed = Y_SPEED;
-    this.xSpeed = X_SPEED; 
-    this.verticalMovement = VERTICAL_MOVEMENT;
-}

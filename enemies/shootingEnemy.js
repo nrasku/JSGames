@@ -20,13 +20,6 @@ function ShootingEnemy(parameters){
 ShootingEnemy.prototype = Object.create(Enemy.prototype);
 ShootingEnemy.prototype.constructor = ShootingEnemy;
 
-ShootingEnemy.prototype.init = function(x, y){
-
-    Enemy.prototype.call(this);
-
-    this.setPosition(0, 0);
-}
-
 ShootingEnemy.prototype.fire = function(){
     var yPos = this.y + this.height/2;
     let missile = {

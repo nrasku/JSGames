@@ -42,26 +42,17 @@
 	var enemyYPositions = [40, 80, 120, 160, 200, 240, 280, 320, 360];
 	var enemyTimer = _.range(1, 30);
 	var enemyX = canvas.width + 50;
-	var enemyHeight = 14;
-	var enemyWidth = 22;
-	var enemySpeed = 2;
 	var enemies = [];
 	for(var e=0;e<20;e++) {
-		enemies.push({x: enemyX, y: _.sample(enemyYPositions), height: enemyHeight, width: enemyWidth, 
-						timing: _.sample(enemyTimer), onField: true});
+		let enemy = new StandardEnemy({y: _.sample(enemyYPositions), timing: _.sample(enemyTimer)})
+		enemies.push(enemy);
 	}
 
 	var zigzagEnemyTimer = _.range(10, 40);
-	var zigzagEnemyHeight = 10;
-	var zigzagEnemyWidth = 20;
-	var zigzagEnemyXSpeed = 2;
-	var zigzagEnemyYSpeed = 2;
-	var verticalMovement = 40;
 	var zigzagEnemies = [];
 	for(var e=0;e<12;e++) {
-		var originalY = _.sample(enemyYPositions);
-		zigzagEnemies.push({x: enemyX, y: originalY, height: zigzagEnemyHeight, width: zigzagEnemyWidth, 
-							timing: _.sample(zigzagEnemyTimer), ySpeed: zigzagEnemyYSpeed, originalY: originalY, onField: true});
+		let zigzag = new ZigZagEnemy({y: _.sample(enemyYPositions), timing: _.sample(zigzagEnemyTimer)});
+		zigzagEnemies.push(zigzag);
 
 	}
 
@@ -71,6 +62,8 @@
 		let shooter = new ShootingEnemy({y: _.sample(enemyYPositions), timing: _.sample(shootingEnemyTimer), missiles: []});
 		shootingEnemies.push(shooter);
 	}
+
+	console.log(shootingEnemies);
 
 	var upPressed = false;
 	var downPressed = false;
@@ -175,7 +168,7 @@
 			if(!enemy.onField || !missile.onField) {
 				continue;
 			} else if(missile.x + missileWidth > enemy.x && missile.x < enemy.x + enemy.width && 
-				missile.y + missileHeight > enemy.y && missile.y < enemy.y + enemyHeight) {
+				missile.y + missileHeight > enemy.y && missile.y < enemy.y + enemy.height) {
 				explode(enemy.x, enemy.y);
 				enemy.onField = false;
 				missile.onField = false;
@@ -209,13 +202,9 @@
 		for(var e=0;e<onFieldEnemies.length;e++) {
 			enemy = onFieldEnemies[e];
 			if(elapsed >= enemy.timing && enemy.x + enemy.width > 0) {
-				ctx.beginPath();
-				ctx.rect(enemy.x, enemy.y, enemyWidth, enemyHeight);
-				ctx.fillStyle = "green";
-				ctx.fill();
-				ctx.closePath();
-				enemy.x -= enemySpeed;
-			} else if(enemy.x + enemy.width <= 0) {
+				enemy.draw();
+				enemy.x -= enemy.speed;
+			} else if(enemy.offGrid()) {
 				enemy.onField = false;
 			}
 		}
@@ -231,17 +220,13 @@
 					enemy.ySpeed = -enemy.ySpeed;
 				} else if(enemy.y + enemy.ySpeed < 0) {
 					enemy.ySpeed = -enemy.ySpeed;
-				} else if(Math.abs(enemy.y - enemy.originalY) > verticalMovement) {
+				} else if(Math.abs(enemy.y - enemy.originalY) > enemy.verticalMovement) {
 					enemy.ySpeed = -enemy.ySpeed;
 				}
-				ctx.beginPath();
-				ctx.rect(enemy.x, enemy.y, zigzagEnemyWidth, zigzagEnemyHeight);
-				ctx.fillStyle = "purple";
-				ctx.fill();
-				ctx.closePath();
-				enemy.x -= zigzagEnemyXSpeed;
+				enemy.draw();
+				enemy.x -= enemy.xSpeed;
 				enemy.y += enemy.ySpeed;
-			} else if(enemy.x + enemy.width <= 0) {
+			} else if(enemy.offGrid()) {
 				enemy.onField = false;
 			}
 		}
@@ -263,7 +248,7 @@
 				}
 				drawEnemyMissiles(enemy);
 				enemyMissileMovement(enemy);
-			} else if(enemy.x + enemy.width <= 0) {
+			} else if(enemy.offGrid()) {
 				enemy.onField = false;
 			}
 		}
@@ -345,7 +330,7 @@
 	}
 
 	function isGameWon() {
-		let onFieldEnemies = onFieldCollection(_.flatten(enemies, zigzagEnemies, shootingEnemies));
+		let onFieldEnemies = onFieldCollection(_.flatten([enemies, zigzagEnemies, shootingEnemies]));
 		if (!(onFieldEnemies.length > 0)) {
 			gameWon = true;
 		}
