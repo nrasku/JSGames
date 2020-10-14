@@ -6,6 +6,7 @@ function Ship(x, y) {
 	this.height = 10;
 	this.width = 20;
 	this.lives = 3;
+	this.missiles = [];
 	this.touchable = true;
 	this.blinkTimer = null;
 	this.blinkTime = 5;
@@ -69,16 +70,15 @@ Ship.prototype.hitByEnemy = function(enemy, enemyArray, index) {
 	}
 }
 
+Ship.prototype.canFire = function() {
+	let onFieldMissiles = this.missiles.filter(function(m) { return m.onField; });
+	return onFieldMissiles.length === 0 || onFieldMissiles[onFieldMissiles.length-1].x - onFieldMissiles[onFieldMissiles.length-1].originalX > onFieldMissiles[0].timing
+}
+
 Ship.prototype.fire = function() {
 	let missile = {
 		x: this.x,
 		y: this.y + this.height/2,
-		width: 5,
-		height: 2,
-		speed: 3,
-		timing: 50,
-		enemyFire: false,
-		onField: true
 	};
-	missiles.push(new Missile(missile));
+	this.missiles.push(new BasicMissile(missile));
 }

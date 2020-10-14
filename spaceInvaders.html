@@ -3,10 +3,13 @@
 <head>
     <meta charset="utf-8" />
     <title>Gamedev Canvas Workshop</title>
-    <script type="text/javascript" src="./underscore-min.js"></script>
+	<script type="text/javascript" src="./underscore-min.js"></script>
+	<script type="text/javascript" src="./helpers.js"></script>
     <script type="text/javascript" src="./explosionParticles.js"></script>
     <script type="text/javascript" src="./ship.js"></script>
-	<script type="text/javascript" src="./missile.js"></script>
+	<script type="text/javascript" src="./ammo/missile.js"></script>
+	<script type="text/javascript" src="./ammo/basicMissile.js"></script>
+	<script type="text/javascript" src="./ammo/shooterMissile.js"></script>
 	<script type="text/javascript" src="./enemies/enemy.js"></script>
 	<script type="text/javascript" src="./enemies/standardEnemy.js"></script>
 	<script type="text/javascript" src="./enemies/zigzagEnemy.js"></script>
@@ -33,11 +36,6 @@
 
 	var missileX = ship.x + ship.width;
 	var missileY = ship.y + ship.height/2;
-	var missileHeight = 2;
-	var missileWidth = 5;
-	var missileSpeed = 3;
-	var missiles = [];
-	var missileSpace = 35;
 
 	var enemyYPositions = [40, 80, 120, 160, 200, 240, 280, 320, 360];
 	var enemyTimer = _.range(1, 30);
@@ -120,7 +118,7 @@
 		}
 
 		if(spacePressed) {
-			if(shipCanFire()) {
+			if(ship.canFire()) {
 				ship.fire();
 			}
 		}
@@ -162,13 +160,13 @@
 	}
 
 	function missileEnemyCollisionDetection(enemy, enemyArray, enemyIndex) {
-		let onFieldMissiles = onFieldCollection(missiles);
+		let onFieldMissiles = onFieldCollection(ship.missiles);
 		for(var m=0;m<onFieldMissiles.length;m++) {
 			var missile = onFieldMissiles[m];
 			if(!enemy.onField || !missile.onField) {
 				continue;
-			} else if(missile.x + missileWidth > enemy.x && missile.x < enemy.x + enemy.width && 
-				missile.y + missileHeight > enemy.y && missile.y < enemy.y + enemy.height) {
+			} else if(missile.x + missile.width > enemy.x && missile.x < enemy.x + enemy.width && 
+				missile.y + missile.height > enemy.y && missile.y < enemy.y + enemy.height) {
 				explode(enemy.x, enemy.y);
 				enemy.onField = false;
 				missile.onField = false;
@@ -178,18 +176,14 @@
 	}
 
 	function drawMissiles() {
-		let onFieldMissiles = onFieldCollection(missiles);
+		let onFieldMissiles = onFieldCollection(ship.missiles);
 		if(onFieldMissiles.length > 0) {
 			for(var m=0;m<onFieldMissiles.length;m++) {
 				missile = onFieldMissiles[m];
-				if(missile.x < canvas.width + missileSpace) {
-					ctx.beginPath();
-					ctx.rect(missile.x, missile.y, missileWidth, missileHeight);
-					ctx.fillStyle = "#F188C1";
-					ctx.fill();
-					ctx.closePath();
+				if(missile.x < canvas.width + missile.timing) {
+					missile.draw();
 				}
-				if(missile.x > canvas.width + missileSpace) {
+				if(missile.x > canvas.width + missile.timing) {
 					missile.onField = false;
 				}
 			}
@@ -259,12 +253,8 @@
 		if(m.length > 0) {
 			for(var x=0;x<m.length;x++) {
 				missile = m[x];
-				if(missile.x < canvas.width + missileSpace) {
-					ctx.beginPath();
-					ctx.rect(missile.x, missile.y, missileWidth, missileHeight);
-					ctx.fillStyle = "#00478A";
-					ctx.fill();
-					ctx.closePath();
+				if(missile.x > -missile.timing) {
+					missile.draw();
 				} else if(missile.x + missile.width < 0) {
 					missile.onField = false;
 				}
@@ -302,12 +292,10 @@
 	}
 
 	function missileMovement() {
-		let shipM = onFieldCollection(missiles)
+		let shipM = onFieldCollection(ship.missiles)
 		for(var x=0;x<shipM.length;x++) {
 			missile = shipM[x];
-			if(missile.x < canvas.width + missileSpace) {
-				missile.x += missileSpeed;
-			}
+			missile.update();
 		}
 	}
 
@@ -315,17 +303,7 @@
 		let enemyM = onFieldCollection(enemy.missiles)
 		for(var m=0;m<enemyM.length;m++) {
 			var missile = enemyM[m];
-			if(missile.x < canvas.width + enemy.missileTiming) {
-				missile.x -= enemy.missileSpeed;
-			}
-		}
-	}
-
-	function onFieldCollection(array) {
-		if(array.length > 0) {
-			return array.filter(function(a) { return a.onField; });
-		} else {
-			return array
+			missile.update();
 		}
 	}
 
