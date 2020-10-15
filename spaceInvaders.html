@@ -34,9 +34,6 @@
 
 	var ship = new Ship(30, canvas.height/2);
 
-	var missileX = ship.x + ship.width;
-	var missileY = ship.y + ship.height/2;
-
 	var enemyYPositions = [40, 80, 120, 160, 200, 240, 280, 320, 360];
 	var enemyTimer = _.range(1, 30);
 	var enemyX = canvas.width + 50;
@@ -60,8 +57,6 @@
 		let shooter = new ShootingEnemy({y: _.sample(enemyYPositions), timing: _.sample(shootingEnemyTimer), missiles: []});
 		shootingEnemies.push(shooter);
 	}
-
-	console.log(shootingEnemies);
 
 	var upPressed = false;
 	var downPressed = false;
@@ -125,48 +120,35 @@
 	}
 
 	function shipCollisionDetection() {
-		for(var x=0;x<enemies.length;x++) {
-			var enemy = enemies[x];
-			ship.hitByEnemy(enemy, enemies, x);
-		}
-		for(var z=0;z<zigzagEnemies.length;z++) {
-			var enemy = zigzagEnemies[z];
-			ship.hitByEnemy(enemy, zigzagEnemies, z);
-		}
-		for(var s=0;s<shootingEnemies.length;s++) {
-			var enemy = shootingEnemies[s];
-			var enemyMissiles = enemy.missiles;
-			ship.hitByEnemy(enemy, shootingEnemies, s);
-			for(var m=0;m<enemyMissiles.length;m++) {
-				var missile = enemyMissiles[m];
-				ship.hitByEnemy(missile, enemyMissiles, m);
+		let onFieldEnemies = onFieldCollection(_.flatten([enemies, zigzagEnemies, shootingEnemies]));
+		for(var x = 0; x < onFieldEnemies.length; x++) {
+			let enemy = onFieldEnemies[x];
+			ship.hitByEnemy(enemy, onFieldEnemies);
+			if (!!enemy.missiles) {
+				let onFieldMissiles = onFieldCollection(enemy.missiles);
+				for(var m = 0; m < onFieldMissiles.length; m++) {
+					let missile = onFieldMissiles[m];
+					ship.hitByEnemy(missile, onFieldMissiles, m)
+				}
 			}
 		}
 	}
 
 	function missileCollisionDetection() {
-		for(var x=0;x<enemies.length;x++) {
-			var enemy = enemies[x];
-			missileEnemyCollisionDetection(enemy, enemies, x);
-		}
-		for(var z=0;z<zigzagEnemies.length;z++) {
-			var enemy = zigzagEnemies[z];
-			missileEnemyCollisionDetection(enemy, zigzagEnemies, z);
-		}
-		for(var s=0;s<shootingEnemies.length;s++) {
-			var enemy = shootingEnemies[s];
-			missileEnemyCollisionDetection(enemy, shootingEnemies, s);
+		let onFieldEnemies = onFieldCollection(_.flatten([enemies, zigzagEnemies, shootingEnemies]));
+		for(var x=0; x < onFieldEnemies.length; x++) {
+			let enemy = onFieldEnemies[x];
+			missileEnemyCollisionDetection(enemy);
 		}
 	}
 
-	function missileEnemyCollisionDetection(enemy, enemyArray, enemyIndex) {
+	function missileEnemyCollisionDetection(enemy) {
 		let onFieldMissiles = onFieldCollection(ship.missiles);
 		for(var m=0;m<onFieldMissiles.length;m++) {
 			var missile = onFieldMissiles[m];
 			if(!enemy.onField || !missile.onField) {
 				continue;
-			} else if(missile.x + missile.width > enemy.x && missile.x < enemy.x + enemy.width && 
-				missile.y + missile.height > enemy.y && missile.y < enemy.y + enemy.height) {
+			} else if(enemy.isHit(missile)) {
 				explode(enemy.x, enemy.y);
 				enemy.onField = false;
 				missile.onField = false;
@@ -180,10 +162,9 @@
 		if(onFieldMissiles.length > 0) {
 			for(var m=0;m<onFieldMissiles.length;m++) {
 				missile = onFieldMissiles[m];
-				if(missile.x < canvas.width + missile.timing) {
+				if(missile.x < canvas.width + missile.width) {
 					missile.draw();
-				}
-				if(missile.x > canvas.width + missile.timing) {
+				} else if(missile.x > canvas.width + missile.width) {
 					missile.onField = false;
 				}
 			}
@@ -191,11 +172,11 @@
 	}
 
 	function drawEnemies() {
-		var elapsed = (new Date() - start)/1000;
+		var elapsed = elapsedSeconds(start);
 		let onFieldEnemies = onFieldCollection(enemies);
 		for(var e=0;e<onFieldEnemies.length;e++) {
 			enemy = onFieldEnemies[e];
-			if(elapsed >= enemy.timing && enemy.x + enemy.width > 0) {
+			if(enemy.shouldDraw(elapsed)) {
 				enemy.draw();
 				enemy.x -= enemy.speed;
 			} else if(enemy.offGrid()) {
@@ -205,11 +186,11 @@
 	}
 
 	function drawZigzagEnemies() {
-		var elapsed = (new Date() - start)/1000;
+		var elapsed = elapsedSeconds(start);
 		let onFieldEnemies = onFieldCollection(zigzagEnemies);
 		for(var z=0;z<onFieldEnemies.length;z++) {
 			var enemy = onFieldEnemies[z];
-			if(elapsed >= enemy.timing && enemy.x + enemy.width > 0) {
+			if(enemy.shouldDraw(elapsed)) {
 				if(enemy.y + enemy.ySpeed > canvas.height) {
 					enemy.ySpeed = -enemy.ySpeed;
 				} else if(enemy.y + enemy.ySpeed < 0) {
@@ -227,14 +208,14 @@
 	}
 
 	function drawShootingEnemies() {
-		var elapsed = (new Date() - start)/1000;
+		var elapsed = elapsedSeconds(start);
 		for(var s=0;s<shootingEnemies.length;s++) {
 			var enemy = shootingEnemies[s];
 			if(!enemy.onField) {
 				drawEnemyMissiles(enemy);
 				enemyMissileMovement(enemy);
 				continue;
-			} else if(elapsed >= enemy.timing && enemy.x + enemy.width > 0) {
+			} else if(enemy.shouldDraw(elapsed)) {
 				enemy.draw();
 				enemy.x -= enemy.speed;
 				if(enemy.canFire()) {

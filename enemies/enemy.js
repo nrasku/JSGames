@@ -22,6 +22,17 @@ Enemy.prototype.draw = function() {
     ctx.closePath();
 }
 
+Enemy.prototype.shouldDraw = function(elapsed) {
+    return elapsed >= this.timing && this.x + this.width > 0
+}
+
 Enemy.prototype.offGrid = function() {
     return this.x + this.width <= 0
+}
+
+Enemy.prototype.isHit = function(missile) {
+    return missile.x + missile.width > this.x && 
+           missile.x < this.x + this.width && 
+           missile.y + missile.height > this.y && 
+           missile.y < this.y + this.height;
 }

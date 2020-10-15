@@ -5,3 +5,7 @@ function onFieldCollection(array) {
         return array
     }
 }
+
+function elapsedSeconds(start) {
+   return (new Date() - start)/1000;
+}
