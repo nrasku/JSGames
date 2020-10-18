@@ -5,9 +5,10 @@ const X_SPEED = 2;
 const Y_SPEED = 1;
 const VERTICAL_MOVEMENT = 40;
 const ZIG_ZAG_COLOUR = "purple"
+const ZIG_ZAG_HUE = 300;
 
 function ZigZagEnemy(parameters){
-    let params = Object.assign(parameters, {height: ZIG_ZAG_HEIGHT, width: ZIG_ZAG_WIDTH, colour: ZIG_ZAG_COLOUR})
+    let params = Object.assign(parameters, {height: ZIG_ZAG_HEIGHT, width: ZIG_ZAG_WIDTH, colour: ZIG_ZAG_COLOUR, hue: ZIG_ZAG_HUE});
 
     Enemy.call(this, params);
 

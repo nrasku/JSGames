@@ -1,11 +1,10 @@
 var particles = [];
-var hue = 120;
 
-function random( min, max ) {
+function random(min, max) {
 	return Math.random() * ( max - min ) + min;
 }
 
-function Particle(x, y) {
+function Particle(x, y, hue) {
 	this.x = x;
 	this.y = y;
 
@@ -51,9 +50,9 @@ Particle.prototype.draw = function() {
 	ctx.stroke();
 }
 
-function explode(x, y) {
+function explode(x, y, hue) {
   	let particleCount = 30;
   	while(particleCount--) {
-  		particles.push(new Particle(x, y));
+  		particles.push(new Particle(x, y, hue));
   	}
 }

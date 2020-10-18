@@ -11,6 +11,7 @@ function Enemy(parameters) {
 
     this.timing = parameters.timing;
     this.colour = parameters.colour || STANDARD_COLOUR;
+    this.hue = parameters.hue || 0;
     this.onField = true
 }
 

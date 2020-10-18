@@ -1,3 +1,5 @@
+const SHIP_HUE = 0;
+
 function Ship(x, y) {
 	this.x = x;
 	this.y = y;
@@ -59,7 +61,7 @@ Ship.prototype.hitByEnemy = function(enemy, enemyArray, index) {
 		this.lives -= 1;
 		this.touchable = false;
 		this.blinkTimer = new Date();
-		explode(enemy.x, enemy.y);
+		explode(this.x, this.y, SHIP_HUE);
 		enemy.onField = false;
 		if(!this.lives) {
 			gameOver = true;
@@ -76,8 +78,9 @@ Ship.prototype.canFire = function() {
 }
 
 Ship.prototype.fire = function() {
+	let bow = this.x + this.width;
 	let missile = {
-		x: this.x,
+		x: bow,
 		y: this.y + this.height/2,
 	};
 	this.missiles.push(new BasicMissile(missile));

@@ -3,9 +3,10 @@ const SHOOTING_WIDTH = 14;
 const SHOOTING_HEIGHT = 10;
 const SHOOTING_SPEED = 1;
 const SHOOTER_COLOUR = "#00478A";
+const SHOOTER_HUE = 240;
     
 function ShootingEnemy(parameters){
-    let params = Object.assign(parameters, {height: SHOOTING_HEIGHT, width: SHOOTING_WIDTH, speed: SHOOTING_SPEED, colour: SHOOTER_COLOUR})
+    let params = Object.assign(parameters, {height: SHOOTING_HEIGHT, width: SHOOTING_WIDTH, speed: SHOOTING_SPEED, colour: SHOOTER_COLOUR, hue: SHOOTER_HUE});
 
     Enemy.call(this, params);
 
