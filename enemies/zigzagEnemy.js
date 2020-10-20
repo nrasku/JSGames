@@ -1,7 +1,7 @@
 const ZIG_ZAG_TIMER = _.range(10, 21);
 const ZIG_ZAG_HEIGHT = 10;
 const ZIG_ZAG_WIDTH = 20;
-const X_SPEED = 2;
+const X_SPEED = 1;
 const Y_SPEED = 1;
 const VERTICAL_MOVEMENT = 40;
 const ZIG_ZAG_COLOUR = "purple"
