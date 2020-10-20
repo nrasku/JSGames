@@ -30,3 +30,8 @@ Missile.prototype.update = function() {
 Missile.prototype.outOfBounds = function() {
 	return this.x > canvas.width + this.timing || this.x + this.width < 0
 }
+
+Missile.prototype.explode = function() {
+    /* TODO missile explosion */
+    return null;
+}

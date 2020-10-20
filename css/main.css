@@ -16,12 +16,13 @@ div#start-screen {
 }
 
 div#start-screen h1 {
-    color: rgb(150, 150, 150)
+    color: rgb(255, 255, 255)
 }
 
 div#start-screen input {
-    color: rgb(150, 150, 150);
+    color: rgb(255, 255, 255);
     background-color: rgb(17, 16, 16);
     margin: 150px;
+    padding: 20px 100px;
     font-size: xx-large;
 }

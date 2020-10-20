@@ -1,6 +1,7 @@
 const ENEMY_Y_POSITIONS = [40, 80, 120, 160, 200, 240, 280, 320, 360];
 const ENEMY_X = 650;
 const STANDARD_COLOUR = "green";
+const EXPLOSION_PARTICLES = 30;
 
 function Enemy(parameters) {
     this.x = parameters.x || ENEMY_X;
@@ -12,6 +13,7 @@ function Enemy(parameters) {
     this.timing = parameters.timing;
     this.colour = parameters.colour || STANDARD_COLOUR;
     this.hue = parameters.hue || 0;
+    this.particles = parameters.particles || EXPLOSION_PARTICLES;
     this.onField = true
 }
 
@@ -36,4 +38,11 @@ Enemy.prototype.isHit = function(missile) {
            missile.x < this.x + this.width && 
            missile.y + missile.height > this.y && 
            missile.y < this.y + this.height;
+}
+
+Enemy.prototype.explode = function() {
+    let particleCount = this.particles;
+  	while(particleCount--) {
+  		particles.push(new Particle(this.x, this.y, this.hue));
+  	}
 }

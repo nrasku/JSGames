@@ -19,7 +19,7 @@
 <body>
 
 <div id="start-screen">
-  <h1>Working Title</h1>
+  <h1>WORKING TITLE</h1>
   <input id="start-button" type="button" value="Start"/>
 </div>
 <canvas id="myCanvas" width="600" height="380"></canvas>
@@ -36,6 +36,8 @@
 	var gameWon = false;
 
 	var ship = new Ship(30, canvas.height/2);
+
+	var particles = [];
 
 	var enemyYPositions = [40, 80, 120, 160, 200, 240, 280, 320, 360];
 	var enemyTimer = _.range(1, 30);
@@ -76,6 +78,7 @@
 		document.getElementById("myCanvas").style.display = "block";
 
 		gameStarted = true;
+		start = new Date();
 	}
 
 	function keyDownHandler(e) {
@@ -160,7 +163,7 @@
 			if(!enemy.onField || !missile.onField) {
 				continue;
 			} else if(enemy.isHit(missile)) {
-				explode(enemy.x, enemy.y, enemy.hue);
+				enemy.explode();
 				enemy.onField = false;
 				missile.onField = false;
 				score += 1;

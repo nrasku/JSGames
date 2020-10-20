@@ -1,5 +1,3 @@
-var particles = [];
-
 function random(min, max) {
 	return Math.random() * ( max - min ) + min;
 }
@@ -48,11 +46,4 @@ Particle.prototype.draw = function() {
 	ctx.lineTo(this.x, this.y);
 	ctx.strokeStyle = 'hsla(' + this.hue + ', 100%, ' + this.brightness + '%, ' + this.alpha + ')';
 	ctx.stroke();
-}
-
-function explode(x, y, hue) {
-  	let particleCount = 30;
-  	while(particleCount--) {
-  		particles.push(new Particle(x, y, hue));
-  	}
 }

@@ -1,4 +1,5 @@
 const SHIP_HUE = 0;
+const SHIP_PARTICLES = 40;
 
 function Ship(x, y) {
 	this.x = x;
@@ -12,6 +13,7 @@ function Ship(x, y) {
 	this.touchable = true;
 	this.blinkTimer = null;
 	this.blinkTime = 5;
+	this.particles = SHIP_PARTICLES;
 }
 
 Ship.prototype.draw = function() {
@@ -61,7 +63,8 @@ Ship.prototype.hitByEnemy = function(enemy, enemyArray, index) {
 		this.lives -= 1;
 		this.touchable = false;
 		this.blinkTimer = new Date();
-		explode(this.x, this.y, SHIP_HUE);
+		this.explode();
+		enemy.explode();
 		enemy.onField = false;
 		if(!this.lives) {
 			gameOver = true;
@@ -69,6 +72,13 @@ Ship.prototype.hitByEnemy = function(enemy, enemyArray, index) {
 			this.x = 10;
 			this.y = canvas.height/2; 
 		}
+	}
+}
+
+Ship.prototype.explode = function() {
+	let particleCount = this.particles;
+	while(particleCount--) {
+		particles.push(new Particle(this.x, this.y, SHIP_HUE));
 	}
 }
 
