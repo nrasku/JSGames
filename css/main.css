@@ -1,13 +1,13 @@
 * { padding: 0; margin: 0; }
 
 canvas { 
-    background: rgb(17, 16, 16); 
+    background-color: rgb(17, 16, 16); 
     display: none;
     margin: 0 auto;
 }
 
 div#start-screen {
-    background: rgb(17, 16, 16);
+    background-color: rgb(17, 16, 16);
     display: block;
     margin: auto;
     height: 380px;
