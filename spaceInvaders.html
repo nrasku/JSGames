@@ -20,6 +20,7 @@
 <body>
 <div hidden>
 	<img src="./backdrop/level-1.jpg">
+	<img src="./assets/ship-1.png">
 </div>
 <div id="start-screen">
   <h1>WORKING TITLE</h1>
@@ -40,7 +41,8 @@
 	var gameOver = false;
 	var gameWon = false;
 
-	var ship = new Ship(30, canvas.height/2);
+	var ship = new Ship({x: 30, y: canvas.height/2});
+	var ship2 = new Ship({x: 30, y: canvas.height/2 + 20, src: "./assets/ship-1.png", lowOpacitySrc: "./assets/ship-1-low-opacity.png"});
 
 	var particles = [];
 
@@ -120,23 +122,28 @@
 		function buttonActions() {
 			if(upPressed) {
 				ship.update(0, -ship.speed);
+				ship2.update(0, -ship.speed);
 			}
 
 			if(downPressed) {
 				ship.update(0, ship.speed);
+				ship2.update(0, ship.speed);
 			} 
 
 			if(rightPressed) {
 				ship.update(ship.speed, 0);
+				ship2.update(ship.speed, 0);
 			} 
 
 			if(leftPressed) {
 				ship.update(-ship.speed, 0);
+				ship2.update(-ship.speed, 0);
 			}
 
 			if(spacePressed) {
 				if(ship.canFire()) {
 					ship.fire();
+					ship2.fireProt();
 				}
 			}
 		}
@@ -146,11 +153,13 @@
 			for(var x = 0; x < onFieldEnemies.length; x++) {
 				let enemy = onFieldEnemies[x];
 				ship.hitByEnemy(enemy, onFieldEnemies);
+				ship2.hitByEnemy(enemy, onFieldEnemies);
 				if (!!enemy.missiles) {
 					let onFieldMissiles = onFieldCollection(enemy.missiles);
 					for(var m = 0; m < onFieldMissiles.length; m++) {
 						let missile = onFieldMissiles[m];
-						ship.hitByEnemy(missile, onFieldMissiles, m)
+						ship.hitByEnemy(missile, onFieldMissiles, m);
+						ship2.hitByEnemy(missile, onFieldEnemies, m);
 					}
 				}
 			}
@@ -180,7 +189,7 @@
 		}
 
 		function drawMissiles() {
-			let onFieldMissiles = onFieldCollection(ship.missiles);
+			let onFieldMissiles = onFieldCollection(_.flatten([ship.missiles, ship2.missiles]));
 			if(onFieldMissiles.length > 0) {
 				for(var m=0;m<onFieldMissiles.length;m++) {
 					missile = onFieldMissiles[m];
@@ -295,7 +304,7 @@
 		}
 
 		function missileMovement() {
-			let shipM = onFieldCollection(ship.missiles)
+			let shipM = onFieldCollection(_.flatten([ship.missiles, ship2.missiles]));
 			for(var x=0;x<shipM.length;x++) {
 				missile = shipM[x];
 				missile.update();
@@ -338,6 +347,7 @@
 					particles[i].update();
 				}
 				ship.draw();
+				ship2.drawProt();
 				isGameWon();
 			}
 			requestAnimationFrame(loop);
