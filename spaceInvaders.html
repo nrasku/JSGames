@@ -6,6 +6,7 @@
 	<link rel="stylesheet" href="./css/main.css">
 	<script type="text/javascript" src="./underscore-min.js"></script>
 	<script type="text/javascript" src="./helpers.js"></script>
+	<script type="text/javascript" src="./shared/hitbox.js"></script>
     <script type="text/javascript" src="./explosionParticles.js"></script>
     <script type="text/javascript" src="./ship.js"></script>
 	<script type="text/javascript" src="./ammo/missile.js"></script>
@@ -41,8 +42,7 @@
 	var gameOver = false;
 	var gameWon = false;
 
-	var ship = new Ship({x: 30, y: canvas.height/2});
-	var ship2 = new Ship({x: 30, y: canvas.height/2 + 20, src: "./assets/ship-1.png", lowOpacitySrc: "./assets/ship-1-low-opacity.png"});
+	var ship = new Ship({x: 30, y: canvas.height/2 + 20, width: 40, height: 40, src: "./assets/ship-1.png", lowOpacitySrc: "./assets/ship-1-low-opacity.png"});
 
 	var particles = [];
 
@@ -77,6 +77,8 @@
 	var spacePressed = false;
 
 	window.onload = function() { 
+		ship.initHitboxes();
+
 		document.addEventListener("keydown", keyDownHandler, false);
 		document.addEventListener("keyup", keyUpHandler, false);
 		document.getElementById("start-button").addEventListener("click", startGame, false);
@@ -122,28 +124,23 @@
 		function buttonActions() {
 			if(upPressed) {
 				ship.update(0, -ship.speed);
-				ship2.update(0, -ship.speed);
 			}
 
 			if(downPressed) {
 				ship.update(0, ship.speed);
-				ship2.update(0, ship.speed);
 			} 
 
 			if(rightPressed) {
 				ship.update(ship.speed, 0);
-				ship2.update(ship.speed, 0);
 			} 
 
 			if(leftPressed) {
 				ship.update(-ship.speed, 0);
-				ship2.update(-ship.speed, 0);
 			}
 
 			if(spacePressed) {
 				if(ship.canFire()) {
 					ship.fire();
-					ship2.fireProt();
 				}
 			}
 		}
@@ -153,13 +150,11 @@
 			for(var x = 0; x < onFieldEnemies.length; x++) {
 				let enemy = onFieldEnemies[x];
 				ship.hitByEnemy(enemy, onFieldEnemies);
-				ship2.hitByEnemy(enemy, onFieldEnemies);
 				if (!!enemy.missiles) {
 					let onFieldMissiles = onFieldCollection(enemy.missiles);
 					for(var m = 0; m < onFieldMissiles.length; m++) {
 						let missile = onFieldMissiles[m];
 						ship.hitByEnemy(missile, onFieldMissiles, m);
-						ship2.hitByEnemy(missile, onFieldEnemies, m);
 					}
 				}
 			}
@@ -189,7 +184,7 @@
 		}
 
 		function drawMissiles() {
-			let onFieldMissiles = onFieldCollection(_.flatten([ship.missiles, ship2.missiles]));
+			let onFieldMissiles = onFieldCollection(ship.missiles);
 			if(onFieldMissiles.length > 0) {
 				for(var m=0;m<onFieldMissiles.length;m++) {
 					missile = onFieldMissiles[m];
@@ -304,7 +299,7 @@
 		}
 
 		function missileMovement() {
-			let shipM = onFieldCollection(_.flatten([ship.missiles, ship2.missiles]));
+			let shipM = onFieldCollection(ship.missiles);
 			for(var x=0;x<shipM.length;x++) {
 				missile = shipM[x];
 				missile.update();
@@ -347,7 +342,6 @@
 					particles[i].update();
 				}
 				ship.draw();
-				ship2.drawProt();
 				isGameWon();
 			}
 			requestAnimationFrame(loop);
