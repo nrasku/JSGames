@@ -7,6 +7,7 @@
 	<script type="text/javascript" src="./underscore-min.js"></script>
 	<script type="text/javascript" src="./helpers.js"></script>
 	<script type="text/javascript" src="./shared/hitbox.js"></script>
+	<script type="text/javascript" src="./initializers/enemyInit.js"></script>
     <script type="text/javascript" src="./explosionParticles.js"></script>
     <script type="text/javascript" src="./ship.js"></script>
 	<script type="text/javascript" src="./ammo/missile.js"></script>
@@ -22,6 +23,7 @@
 <div hidden>
 	<img src="./backdrop/level-1.jpg">
 	<img src="./assets/ship-1.png">
+	<img src="./assets/standard_enemy.png">
 </div>
 <div id="start-screen">
   <h1>WORKING TITLE</h1>
@@ -46,38 +48,22 @@
 
 	var particles = [];
 
-	var enemyYPositions = [40, 80, 120, 160, 200, 240, 280, 320, 360];
-	var enemyTimer = _.range(1, 30);
-	var enemyX = canvas.width + 50;
-	var enemies = [];
-	for(var e=0;e<20;e++) {
-		let enemy = new StandardEnemy({y: _.sample(enemyYPositions), timing: _.sample(enemyTimer)})
-		enemies.push(enemy);
-	}
-
-	var zigzagEnemyTimer = _.range(10, 40);
-	var zigzagEnemies = [];
-	for(var e=0;e<12;e++) {
-		let zigzag = new ZigZagEnemy({y: _.sample(enemyYPositions), timing: _.sample(zigzagEnemyTimer)});
-		zigzagEnemies.push(zigzag);
-
-	}
-
-	var shootingEnemyTimer = _.range(30, 60);
-	var shootingEnemies = [];
-	for(var s=0;s<8;s++) {
-		let shooter = new ShootingEnemy({y: _.sample(enemyYPositions), timing: _.sample(shootingEnemyTimer), missiles: []});
-		shootingEnemies.push(shooter);
-	}
-
 	var upPressed = false;
 	var downPressed = false;
 	var rightPressed = false;
 	var leftPressed = false;
 	var spacePressed = false;
 
+	var enemies = [];
+	var zigzagEnemies = [];
+	var shootingEnemies = [];
+
 	window.onload = function() { 
 		ship.initHitboxes();
+
+		enemies = initializeStandardEnemies(3, 45);
+		zigzagEnemies = initializeZigzagEnemies(15, 60);
+		shootingEnemies = initializeShootingEnemies(20, 60);
 
 		document.addEventListener("keydown", keyDownHandler, false);
 		document.addEventListener("keyup", keyUpHandler, false);

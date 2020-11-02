@@ -15,14 +15,23 @@ function Enemy(parameters) {
     this.hue = parameters.hue || 0;
     this.particles = parameters.particles || EXPLOSION_PARTICLES;
     this.onField = true
+    if(parameters.src) {
+        this.image = new Image();
+        this.image.src = parameters.src;
+    }
 }
 
 Enemy.prototype.draw = function() {
-    ctx.beginPath();
-    ctx.rect(this.x, this.y, this.width, this.height);
-    ctx.fillStyle = this.colour;
-    ctx.fill();
-    ctx.closePath();
+    if(this.image) {
+        ctx.drawImage(this.image, this.x, this.y);
+        this.hitboxes.forEach(function (item) { item.update(-1, 0); });
+    } else {
+        ctx.beginPath();
+        ctx.rect(this.x, this.y, this.width, this.height);
+        ctx.fillStyle = this.colour;
+        ctx.fill();
+        ctx.closePath();
+    }
 }
 
 Enemy.prototype.shouldDraw = function(elapsed) {
@@ -34,10 +43,15 @@ Enemy.prototype.offGrid = function() {
 }
 
 Enemy.prototype.isHit = function(missile) {
-    return missile.x + missile.width > this.x && 
-           missile.x < this.x + this.width && 
-           missile.y + missile.height > this.y && 
-           missile.y < this.y + this.height;
+    if(this.hitboxes) {
+        let collision = this.hitboxes.map(function (hitbox) {return collides(hitbox, missile)})
+        return collision.includes(true);
+    } else {
+        return missile.x + missile.width > this.x && 
+            missile.x < this.x + this.width && 
+            missile.y + missile.height > this.y && 
+            missile.y < this.y + this.height;
+    }
 }
 
 Enemy.prototype.explode = function() {

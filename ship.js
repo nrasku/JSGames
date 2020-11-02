@@ -24,8 +24,8 @@ function Ship(ship) {
 }
 
 Ship.prototype.initHitboxes = function() {
-	this.hitboxes = [new HitBox({x: this.x, y: this.y, width: 15, height: this.image.height, rightLimit: 15}), 
-					 new HitBox({x: this.x + 15, y: this.y + 13, width: 20, height: 16, leftLimit: 14, topLimit: 13, bottomLimit: 13})];
+	this.hitboxes = [new HitBox({x: this.x, y: this.y, width: 15, height: this.image.height, rightLimit: 15, checkBounds: true}), 
+					 new HitBox({x: this.x + 15, y: this.y + 13, width: 20, height: 16, leftLimit: 14, topLimit: 13, bottomLimit: 13, checkBounds: true})];
 }
 
 Ship.prototype.draw = function() {
