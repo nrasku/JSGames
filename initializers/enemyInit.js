@@ -15,8 +15,9 @@ function initializeStandardEnemies(start, stop) {
 function initializeZigzagEnemies(start, stop) {
     let timer = _.range(start, stop);
     let zigzagEnemies = [];
-    for(var e=0;e<12;e++) {
+    for(var e=0;e<11;e++) {
         let zigzag = new ZigZagEnemy({y: _.sample(enemyYPositions), timing: _.sample(timer)});
+        zigzag.initHitboxes();
         zigzagEnemies.push(zigzag);
     }
 

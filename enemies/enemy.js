@@ -8,7 +8,8 @@ function Enemy(parameters) {
     this.y = parameters.y;
     this.height = parameters.height;
     this.width = parameters.width;
-    this.speed = parameters.speed;
+    this.ySpeed = parameters.ySpeed;
+    this.xSpeed = parameters.xSpeed;
 
     this.timing = parameters.timing;
     this.colour = parameters.colour || STANDARD_COLOUR;
@@ -24,7 +25,7 @@ function Enemy(parameters) {
 Enemy.prototype.draw = function() {
     if(this.image) {
         ctx.drawImage(this.image, this.x, this.y);
-        this.hitboxes.forEach(function (item) { item.update(-1, 0); });
+        this.hitboxes.forEach(function (item) { item.update(-this.xSpeed, this.ySpeed); }.bind(this));
     } else {
         ctx.beginPath();
         ctx.rect(this.x, this.y, this.width, this.height);

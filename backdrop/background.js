@@ -1,5 +1,5 @@
 CANVAS_WIDTH = 600;
-CANVAS_HEIGTH = 380;
+CANVAS_HEIGTH = 400;
 BACKGROUND_SPEED = -0.2;
 
 function Background(item) {
