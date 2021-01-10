@@ -30,6 +30,7 @@ function initializeShootingEnemies(start, stop) {
     let shootingEnemies = [];
     for(var s=0;s<8;s++) {
         let shooter = new ShootingEnemy({y: _.sample(enemyYPositions), timing: _.sample(timer), missiles: []});
+        shooter.initHitboxes();
         shootingEnemies.push(shooter);
     }
 
